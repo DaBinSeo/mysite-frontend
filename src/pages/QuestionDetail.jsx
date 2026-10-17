@@ -52,11 +52,25 @@ export default function QuestionDetail() {
   const [content, setContent] = useState('')
   const [answerError, setAnswerError] = useState(null)
 
+  // 답변 등록·삭제 후 다시 불러올 때 사용
   const load = useCallback(() => api.get(`/questions/${id}/`).then(setQuestion), [id])
 
+  // 질문이 바뀌면 다시 불러온다. 이전 오류는 지우고, 늦게 도착한 이전 질문의 응답은 무시한다
   useEffect(() => {
-    load().catch(setLoadError)
-  }, [load])
+    let ignore = false
+    api.get(`/questions/${id}/`)
+      .then((result) => {
+        if (ignore) return
+        setQuestion(result)
+        setLoadError(null)
+      })
+      .catch((err) => {
+        if (!ignore) setLoadError(err)
+      })
+    return () => {
+      ignore = true
+    }
+  }, [id])
 
   // #answer_<id>로 들어오면 해당 답변 위치로 이동
   useEffect(() => {

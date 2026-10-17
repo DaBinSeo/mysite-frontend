@@ -62,10 +62,12 @@ function send(method, path, body, token) {
   })
 }
 
-async function refreshAccess() {
-  const res = await send('POST', '/auth/refresh/', { refresh: tokenStore.refresh })
+async function refreshAccess(refresh) {
+  const res = await send('POST', '/auth/refresh/', { refresh })
   if (!res.ok) return null
   const { access } = await res.json()
+  // 갱신하는 사이에 로그아웃(또는 다른 계정으로 로그인)했으면 늦게 온 토큰은 버린다
+  if (tokenStore.refresh !== refresh) return null
   tokenStore.save({ access })
   return access
 }
@@ -74,14 +76,16 @@ let refreshing = null // 여러 요청이 동시에 401을 받아도 refresh는 
 
 export async function apiRequest(method, path, body) {
   let res = await send(method, path, body, tokenStore.access)
-  if (res.status === 401 && tokenStore.refresh) {
-    refreshing ??= refreshAccess().finally(() => {
+  const refresh = tokenStore.refresh
+  if (res.status === 401 && refresh) {
+    refreshing ??= refreshAccess(refresh).finally(() => {
       refreshing = null
     })
     const access = await refreshing
     if (access) {
       res = await send(method, path, body, access)
-    } else {
+    } else if (tokenStore.refresh === refresh) {
+      // refresh도 실패: 로그아웃 처리. 그사이 세션이 바뀌었으면 새 세션은 건드리지 않는다
       tokenStore.clear()
       onAuthFailure()
     }

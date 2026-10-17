@@ -3,6 +3,7 @@ import Navbar from './components/Navbar.jsx'
 import RequireAuth from './components/RequireAuth.jsx'
 import AnswerForm from './pages/AnswerForm.jsx'
 import Login from './pages/Login.jsx'
+import NotFound from './pages/NotFound.jsx'
 import QuestionDetail from './pages/QuestionDetail.jsx'
 import QuestionForm from './pages/QuestionForm.jsx'
 import QuestionList from './pages/QuestionList.jsx'
@@ -20,7 +21,7 @@ function App() {
         <Route path="/answers/:id/edit" element={<RequireAuth><AnswerForm /></RequireAuth>} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="*" element={<div className="container my-3">페이지를 찾을 수 없습니다.</div>} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   )

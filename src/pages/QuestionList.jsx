@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { api } from '../api/client.js'
-import FormErrors from '../components/FormErrors.jsx'
 import Pagination from '../components/Pagination.jsx'
 import { formatDate } from '../utils/format.js'
+import ErrorPage from './ErrorPage.jsx'
 
 // 질문 목록 (question_list.html). 검색어와 페이지는 URL 쿼리(?kw=&page=)로 유지한다.
 export default function QuestionList() {
@@ -43,6 +43,8 @@ export default function QuestionList() {
     go(1, new FormData(e.currentTarget).get('kw').trim()) // 검색하면 1페이지부터 조회한다.
   }
 
+  if (error) return <ErrorPage status={error.status} />
+
   return (
     <div className="container my-3">
       <div className="row my-3">
@@ -58,7 +60,6 @@ export default function QuestionList() {
           </form>
         </div>
       </div>
-      <FormErrors error={error} />
       <table className="table">
         <thead>
           <tr className="text-center table-dark">

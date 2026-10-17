@@ -59,6 +59,8 @@ function send(method, path, body, token) {
     method,
     headers,
     body: body === undefined ? undefined : JSON.stringify(body),
+  }).catch(() => {
+    throw new ApiError(0, { detail: '서버에 연결할 수 없습니다.' }) // 서버가 꺼졌거나 네트워크가 끊긴 경우
   })
 }
 

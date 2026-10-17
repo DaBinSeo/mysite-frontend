@@ -4,7 +4,7 @@ import { api } from '../api/client.js'
 import { useAuth } from '../auth/useAuth.js'
 import FormErrors from '../components/FormErrors.jsx'
 import { formatDate, loginPath } from '../utils/format.js'
-import NotFound from './NotFound.jsx'
+import ErrorPage from './ErrorPage.jsx'
 
 // 작성자·작성일시·수정일시 표시
 function Dates({ item }) {
@@ -139,11 +139,9 @@ export default function QuestionDetail() {
   }
 
   if (loadError?.status === 404) {
-    return <NotFound title="질문을 찾을 수 없어요" message="삭제되었거나 존재하지 않는 질문입니다." />
+    return <ErrorPage status={404} title="질문을 찾을 수 없어요" message="삭제되었거나 존재하지 않는 질문입니다." />
   }
-  if (loadError) {
-    return <div className="container my-3"><div className="alert alert-danger">{loadError.message}</div></div>
-  }
+  if (loadError) return <ErrorPage status={loadError.status} />
   if (!question) return <div className="container my-3">불러오는 중...</div>
 
   return (

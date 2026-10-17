@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router'
 import { api } from '../api/client.js'
 import { useAuth } from '../auth/useAuth.js'
 import FormErrors from '../components/FormErrors.jsx'
+import ErrorPage from './ErrorPage.jsx'
 
 const LABELS = { subject: '제목', content: '내용' }
 
@@ -14,6 +15,7 @@ export default function QuestionForm() {
   const navigate = useNavigate()
   const [form, setForm] = useState({ subject: '', content: '' })
   const [error, setError] = useState(null)
+  const [loadError, setLoadError] = useState(null) // 수정할 질문 불러오기 실패
 
   useEffect(() => {
     if (!editing) return
@@ -25,7 +27,7 @@ export default function QuestionForm() {
         }
         setForm({ subject: question.subject, content: question.content })
       })
-      .catch(setError)
+      .catch(setLoadError)
   }, [editing, id, username, navigate])
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
@@ -41,6 +43,10 @@ export default function QuestionForm() {
     } catch (err) {
       setError(err)
     }
+  }
+
+  if (loadError) {
+    return <ErrorPage status={loadError.status} {...(loadError.status === 404 && { title: '질문을 찾을 수 없어요' })} />
   }
 
   return (

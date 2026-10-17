@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router'
 import { api } from '../api/client.js'
 import { useAuth } from '../auth/useAuth.js'
 import FormErrors from '../components/FormErrors.jsx'
+import ErrorPage from './ErrorPage.jsx'
 
 // 답변 수정 (answer_form.html)
 export default function AnswerForm() {
@@ -12,6 +13,7 @@ export default function AnswerForm() {
   const [answer, setAnswer] = useState(null)
   const [content, setContent] = useState('')
   const [error, setError] = useState(null)
+  const [loadError, setLoadError] = useState(null) // 수정할 답변 불러오기 실패
 
   useEffect(() => {
     api.get(`/answers/${id}/`)
@@ -23,7 +25,7 @@ export default function AnswerForm() {
         setAnswer(result)
         setContent(result.content)
       })
-      .catch(setError)
+      .catch(setLoadError)
   }, [id, username, navigate])
 
   const handleSubmit = async (e) => {
@@ -35,6 +37,10 @@ export default function AnswerForm() {
     } catch (err) {
       setError(err)
     }
+  }
+
+  if (loadError) {
+    return <ErrorPage status={loadError.status} {...(loadError.status === 404 && { title: '답변을 찾을 수 없어요' })} />
   }
 
   return (

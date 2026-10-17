@@ -1,35 +1,28 @@
-import { useEffect, useState } from 'react'
+import { Route, Routes } from 'react-router'
+import Navbar from './components/Navbar.jsx'
+import RequireAuth from './components/RequireAuth.jsx'
+import AnswerForm from './pages/AnswerForm.jsx'
+import Login from './pages/Login.jsx'
+import QuestionDetail from './pages/QuestionDetail.jsx'
+import QuestionForm from './pages/QuestionForm.jsx'
+import QuestionList from './pages/QuestionList.jsx'
+import Signup from './pages/Signup.jsx'
 
 function App() {
-  const [questions, setQuestions] = useState([])
-  const [error, setError] = useState(null)
-
-  useEffect(() => {
-    // 게이트웨이(localhost:8080)를 거치므로 같은 출처의 상대 경로로 호출한다.
-    fetch('/api/questions/')
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        return res.json()
-      })
-      .then((data) => setQuestions(data.questions))
-      .catch((err) => setError(err.message))
-  }, [])
-
   return (
-    <main style={{ maxWidth: 720, margin: '40px auto', padding: '0 16px', textAlign: 'left' }}>
-      <h1>Pybo 질문 목록 (React)</h1>
-      {error && <p style={{ color: 'crimson' }}>불러오기 실패: {error}</p>}
-      <ul>
-        {questions.map((q) => (
-          <li key={q.id}>
-            <a href={`/pybo/${q.id}/`}>{q.subject}</a>{' '}
-            <small>
-              {q.author} · {new Date(q.create_date).toLocaleString('ko-KR')}
-            </small>
-          </li>
-        ))}
-      </ul>
-    </main>
+    <>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<QuestionList />} />
+        <Route path="/questions/new" element={<RequireAuth><QuestionForm /></RequireAuth>} />
+        <Route path="/questions/:id" element={<QuestionDetail />} />
+        <Route path="/questions/:id/edit" element={<RequireAuth><QuestionForm /></RequireAuth>} />
+        <Route path="/answers/:id/edit" element={<RequireAuth><AnswerForm /></RequireAuth>} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="*" element={<div className="container my-3">페이지를 찾을 수 없습니다.</div>} />
+      </Routes>
+    </>
   )
 }
 

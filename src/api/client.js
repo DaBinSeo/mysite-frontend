@@ -16,7 +16,13 @@ export const tokenStore = {
   },
   get user() {
     const raw = localStorage.getItem(USER_KEY)
-    return raw ? JSON.parse(raw) : null
+    if (!raw) return null
+    try {
+      return JSON.parse(raw)
+    } catch {
+      localStorage.removeItem(USER_KEY) // 손상된 값은 지워서 다음 로드부터 정상화
+      return null
+    }
   },
   save({ access, refresh, user }) {
     if (access) localStorage.setItem(ACCESS_KEY, access)

@@ -10,9 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "easymde": "^2.21.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-router": "^8.4.0"
+    "react-router": "^8.4.0",
+    "react-simplemde-editor": "^5.2.0"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",

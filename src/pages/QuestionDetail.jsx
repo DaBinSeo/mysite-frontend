@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { api } from '../api/client.js'
 import { useAuth } from '../auth/useAuth.js'
 import FormErrors from '../components/FormErrors.jsx'
+import MarkdownEditor from '../components/MarkdownEditor.jsx'
 import { formatDate, loginPath } from '../utils/format.js'
 import ErrorPage from './ErrorPage.jsx'
 
@@ -182,8 +183,7 @@ export default function QuestionDetail() {
       <form onSubmit={submitAnswer} className="my-3">
         <FormErrors error={answerError} labels={{ content: '답변내용' }} />
         <div className="mb-3">
-          <textarea disabled={!user} name="content" id="content" className="form-control" rows="10"
-                    aria-label="답변내용" value={content} onChange={(e) => setContent(e.target.value)} />
+          <MarkdownEditor id="content" value={content} onChange={setContent} disabled={!user} />
         </div>
         <input type="submit" value="답변등록" className="btn btn-primary" />
       </form>

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router'
 import { api } from '../api/client.js'
 import { useAuth } from '../auth/useAuth.js'
 import FormErrors from '../components/FormErrors.jsx'
+import MarkdownEditor from '../components/MarkdownEditor.jsx'
 import ErrorPage from './ErrorPage.jsx'
 
 // 답변 수정 (answer_form.html)
@@ -49,8 +50,7 @@ export default function AnswerForm() {
         <FormErrors error={error} labels={{ content: '답변내용' }} />
         <div className="mb-3">
           <label htmlFor="content" className="form-label">답변내용</label>
-          <textarea className="form-control" name="content" id="content" rows="10"
-                    value={content} onChange={(e) => setContent(e.target.value)} disabled={!answer} />
+          <MarkdownEditor id="content" value={content} onChange={setContent} disabled={!answer} />
         </div>
         <button type="submit" className="btn btn-primary" disabled={!answer}>저장하기</button>
       </form>

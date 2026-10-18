@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router'
 import { api } from '../api/client.js'
 import { useAuth } from '../auth/useAuth.js'
 import FormErrors from '../components/FormErrors.jsx'
+import MarkdownEditor from '../components/MarkdownEditor.jsx'
 import ErrorPage from './ErrorPage.jsx'
 
 const LABELS = { subject: '제목', content: '내용' }
@@ -61,8 +62,8 @@ export default function QuestionForm() {
         </div>
         <div className="mb-3">
           <label htmlFor="content" className="form-label">내용</label>
-          <textarea className="form-control" name="content" id="content" rows="10"
-                    value={form.content} onChange={handleChange} />
+          <MarkdownEditor id="content" value={form.content}
+                          onChange={(content) => setForm((f) => ({ ...f, content }))} />
         </div>
         <button type="submit" className="btn btn-primary">저장하기</button>
       </form>

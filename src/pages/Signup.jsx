@@ -4,13 +4,13 @@ import { api } from '../api/client.js'
 import { useAuth } from '../auth/useAuth.js'
 import FormErrors from '../components/FormErrors.jsx'
 
-const LABELS = { username: '사용자 이름', password1: '비밀번호', password2: '비밀번호 확인', email: '이메일' }
+const LABELS = { username: '사용자ID', password1: '비밀번호', password2: '비밀번호 확인', nickname: '닉네임' }
 
 // 회원가입 (signup.html). 비밀번호 조건은 서버의 AUTH_PASSWORD_VALIDATORS 문구를 받아 표시
 export default function Signup() {
   const { signup } = useAuth()
   const navigate = useNavigate()
-  const [form, setForm] = useState({ username: '', password1: '', password2: '', email: '' })
+  const [form, setForm] = useState({ username: '', password1: '', password2: '', nickname: '' })
   const [rules, setRules] = useState(null)
   const [error, setError] = useState(null)
 
@@ -37,7 +37,7 @@ export default function Signup() {
       <form onSubmit={handleSubmit}>
         <FormErrors error={error} labels={LABELS} />
         <div className="mb-3">
-          <label htmlFor="username">사용자 이름</label>
+          <label htmlFor="username">사용자ID</label>
           <input type="text" className="form-control" name="username" id="username" autoComplete="username"
                  value={form.username} onChange={handleChange} />
         </div>
@@ -58,9 +58,13 @@ export default function Signup() {
           <div id="password2_help" className="form-text">{rules?.confirm_help}</div>
         </div>
         <div className="mb-3">
-          <label htmlFor="email">이메일</label>
-          <input type="text" className="form-control" name="email" id="email" autoComplete="email"
-                 value={form.email} onChange={handleChange} />
+          <label htmlFor="nickname">닉네임</label>
+          <input type="text" className="form-control" name="nickname" id="nickname" autoComplete="nickname"
+                 maxLength={20} aria-describedby="nickname_help"
+                 value={form.nickname} onChange={handleChange} />
+          <div id="nickname_help" className="form-text">
+            한글·영문·숫자만 쓸 수 있습니다(공백·특수문자 불가). 한글이 들어가면 2자, 아니면 3자 이상.
+          </div>
         </div>
         <button type="submit" className="btn btn-primary">생성하기</button>
       </form>

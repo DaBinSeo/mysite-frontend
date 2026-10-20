@@ -161,7 +161,7 @@ export default function QuestionDetail() {
           {/* content_html은 서버에서 nh3로 정리한 HTML */}
           <div className="card-text" dangerouslySetInnerHTML={{ __html: question.content_html }} />
           <Dates item={question} />
-          <Actions item={question} isAuthor={user?.username === question.author}
+          <Actions item={question} isAuthor={user?.id === question.author_id}
                    editPath={`/questions/${question.id}/edit`}
                    onVote={voteQuestion} onDelete={deleteQuestion} />
         </div>
@@ -173,7 +173,7 @@ export default function QuestionDetail() {
           <div className="card-body">
             <div className="card-text" dangerouslySetInnerHTML={{ __html: answer.content_html }} />
             <Dates item={answer} />
-            <Actions item={answer} isAuthor={user?.username === answer.author}
+            <Actions item={answer} isAuthor={user?.id === answer.author_id}
                      editPath={`/answers/${answer.id}/edit`}
                      onVote={() => voteAnswer(answer)} onDelete={() => deleteAnswer(answer)} />
           </div>

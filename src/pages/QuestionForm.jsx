@@ -12,7 +12,7 @@ const LABELS = { subject: '제목', content: '내용' }
 export default function QuestionForm() {
   const { id } = useParams()
   const editing = Boolean(id)
-  const username = useAuth().user?.username
+  const userId = useAuth().user?.id
   const navigate = useNavigate()
   const [form, setForm] = useState({ subject: '', content: '' })
   const [error, setError] = useState(null)
@@ -22,14 +22,14 @@ export default function QuestionForm() {
     if (!editing) return
     api.get(`/questions/${id}/`)
       .then((question) => {
-        if (question.author !== username) {
+        if (question.author_id !== userId) {
           navigate(`/questions/${id}`, { replace: true, state: { message: '수정권한이 없습니다.' } })
           return
         }
         setForm({ subject: question.subject, content: question.content })
       })
       .catch(setLoadError)
-  }, [editing, id, username, navigate])
+  }, [editing, id, userId, navigate])
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 

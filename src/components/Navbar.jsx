@@ -28,7 +28,7 @@ export default function Navbar() {
             {user ? (
               <li className="nav-item">
                 <button type="button" className="nav-link btn btn-link" onClick={handleLogout}>
-                  {user.nickname ?? user.username} (로그아웃)
+                  {user.nickname} (로그아웃)
                 </button>
               </li>
             ) : (

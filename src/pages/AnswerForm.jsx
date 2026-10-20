@@ -9,7 +9,7 @@ import ErrorPage from './ErrorPage.jsx'
 // 답변 수정 (answer_form.html)
 export default function AnswerForm() {
   const { id } = useParams()
-  const username = useAuth().user?.username
+  const userId = useAuth().user?.id
   const navigate = useNavigate()
   const [answer, setAnswer] = useState(null)
   const [content, setContent] = useState('')
@@ -19,7 +19,7 @@ export default function AnswerForm() {
   useEffect(() => {
     api.get(`/answers/${id}/`)
       .then((result) => {
-        if (result.author !== username) {
+        if (result.author_id !== userId) {
           navigate(`/questions/${result.question_id}`, { replace: true, state: { message: '수정권한이 없습니다' } })
           return
         }
@@ -27,7 +27,7 @@ export default function AnswerForm() {
         setContent(result.content)
       })
       .catch(setLoadError)
-  }, [id, username, navigate])
+  }, [id, userId, navigate])
 
   const handleSubmit = async (e) => {
     e.preventDefault()

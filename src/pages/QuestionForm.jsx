@@ -40,7 +40,7 @@ export default function QuestionForm() {
       const question = editing
         ? await api.put(`/questions/${id}/`, form)
         : await api.post('/questions/', form)
-      navigate(editing ? `/questions/${question.id}` : '/')
+      navigate(editing ? `/questions/${question.id}` : '/questions')
     } catch (err) {
       setError(err)
     }

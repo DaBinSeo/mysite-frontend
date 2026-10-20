@@ -102,7 +102,7 @@ export default function QuestionDetail() {
     if (!window.confirm('정말로 삭제하시겠습니까?')) return
     run(async () => {
       await api.delete(`/questions/${id}/`)
-      navigate('/')
+      navigate('/questions')
     })
   }
 

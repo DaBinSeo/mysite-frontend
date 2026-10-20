@@ -29,7 +29,7 @@ export default function ErrorPage({ status = 500, title, message }) {
           : '아래 버튼으로 이동해 주세요.'}
       </p>
       <div className="d-flex justify-content-center gap-2 mt-4">
-        <Link to="/" className="btn btn-primary">질문 목록으로</Link>
+        <Link to="/questions" className="btn btn-primary">질문 목록으로</Link>
         <button type="button" className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
           이전 페이지로
         </button>

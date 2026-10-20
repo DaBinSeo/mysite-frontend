@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router'
+import { Link, NavLink, useNavigate } from 'react-router'
 import { useAuth } from '../auth/useAuth.js'
 
 // 네비게이션바 (navbar.html)
@@ -25,6 +25,12 @@ export default function Navbar() {
         </button>
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+            <li className="nav-item">
+              {/* 질문·답변 게시판 (목록·상세·작성 화면 모두 /questions 아래) */}
+              <NavLink className="nav-link" to="/questions">Q&amp;A</NavLink>
+            </li>
+          </ul>
+          <ul className="navbar-nav mb-2 mb-lg-0">
             {user ? (
               <li className="nav-item">
                 <button type="button" className="nav-link btn btn-link" onClick={handleLogout}>

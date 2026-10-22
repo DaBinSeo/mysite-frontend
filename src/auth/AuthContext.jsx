@@ -26,8 +26,11 @@ export function AuthProvider({ children }) {
     login: async (username, password) => saveSession(await api.post('/auth/login/', { username, password })),
     signup: async (form) => saveSession(await api.post('/auth/signup/', form)),
     logout: () => {
+      const { refresh } = tokenStore
       tokenStore.clear()
       setUser(null)
+      // 서버에서 이 기기의 refresh 토큰을 폐기한다. 실패해도 화면은 이미 로그아웃 상태다
+      if (refresh) api.post('/auth/logout/', { refresh }).catch(() => {})
     },
   }
 

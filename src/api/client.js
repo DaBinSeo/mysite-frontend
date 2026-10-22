@@ -64,14 +64,23 @@ function send(method, path, body, token) {
   })
 }
 
+// refresh 토큰은 한 번만 쓸 수 있으므로, 여러 탭이 같은 토큰으로 동시에 갱신하지 않게 탭 사이에서 한 번에 하나씩 갱신한다
 async function refreshAccess(refresh) {
-  const res = await send('POST', '/auth/refresh/', { refresh })
-  if (!res.ok) return null
-  const { access } = await res.json()
-  // 갱신하는 사이에 로그아웃(또는 다른 계정으로 로그인)했으면 늦게 온 토큰은 버린다
-  if (tokenStore.refresh !== refresh) return null
-  tokenStore.save({ access })
-  return access
+  const run = async () => {
+    // 기다리는 사이에 다른 탭이 먼저 갱신했으면 그 탭이 저장한 토큰을 쓴다 (로그아웃했으면 null)
+    if (tokenStore.refresh !== refresh) return tokenStore.refresh ? tokenStore.access : null
+    const res = await send('POST', '/auth/refresh/', { refresh })
+    if (res.status === 401) return null
+    // 서버 오류 등 일시적인 실패로는 로그아웃하지 않는다
+    if (!res.ok) throw new ApiError(res.status, await res.json().catch(() => null))
+    // 서버가 새 refresh 토큰도 함께 준다
+    const { access, refresh: nextRefresh } = await res.json()
+    // 갱신하는 사이에 로그아웃(또는 다른 계정으로 로그인)했으면 늦게 온 토큰은 버린다
+    if (tokenStore.refresh !== refresh) return null
+    tokenStore.save({ access, refresh: nextRefresh })
+    return access
+  }
+  return navigator.locks ? navigator.locks.request('pybo.refresh', run) : run()
 }
 
 let refreshing = null // 여러 요청이 동시에 401을 받아도 refresh는 한 번만 보낸다

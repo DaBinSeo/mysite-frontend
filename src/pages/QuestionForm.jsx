@@ -5,6 +5,7 @@ import { useAuth } from '../auth/useAuth.js'
 import FormErrors from '../components/FormErrors.jsx'
 import MarkdownEditor from '../components/MarkdownEditor.jsx'
 import ErrorPage from './ErrorPage.jsx'
+import { checkContentLength } from '../utils/content.js'
 import { useTitle } from '../utils/useTitle.js'
 
 const LABELS = { subject: '제목', content: '내용' }
@@ -37,6 +38,7 @@ export default function QuestionForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!checkContentLength(form.content)) return
     setError(null)
     try {
       const question = editing

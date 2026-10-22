@@ -5,6 +5,7 @@ import { useAuth } from '../auth/useAuth.js'
 import FormErrors from '../components/FormErrors.jsx'
 import MarkdownEditor from '../components/MarkdownEditor.jsx'
 import ErrorPage from './ErrorPage.jsx'
+import { checkContentLength } from '../utils/content.js'
 import { useTitle } from '../utils/useTitle.js'
 
 // 답변 수정 (answer_form.html)
@@ -33,6 +34,7 @@ export default function AnswerForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!checkContentLength(content)) return
     setError(null)
     try {
       const saved = await api.put(`/answers/${id}/`, { content })

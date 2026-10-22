@@ -1,6 +1,7 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import SimpleMDE from 'react-simplemde-editor'
 import 'easymde/dist/easymde.min.css'
+import { CONTENT_MAX_LENGTH, checkContentLength, contentLength } from '../utils/content.js'
 
 // 마크다운 입력기 (EasyMDE). 화면 출력은 여전히 서버의 content_html만 쓴다
 export default function MarkdownEditor({ id, value, onChange, disabled }) {
@@ -14,9 +15,29 @@ export default function MarkdownEditor({ id, value, onChange, disabled }) {
     shortcuts: { togglePreview: null, toggleSideBySide: null, toggleFullScreen: null },
   }), [])
 
+  // 제한을 넘는 순간에 한 번 알린다 (넘은 채로 계속 입력할 때마다 알리지는 않는다)
+  const overRef = useRef(false)
+  useEffect(() => {
+    overRef.current = contentLength(value) > CONTENT_MAX_LENGTH // 등록 후 비우기처럼 밖에서 값이 바뀐 경우
+  }, [value])
+  const handleChange = (next) => {
+    const over = contentLength(next) > CONTENT_MAX_LENGTH
+    if (over && !overRef.current) checkContentLength(next)
+    overRef.current = over
+    onChange(next)
+  }
+
   // EasyMDE에는 비활성 모드가 없어서 비활성일 때는 기존 textarea를 보여준다
   if (disabled) {
     return <textarea className="form-control" id={id} rows="10" value={value} disabled readOnly />
   }
-  return <SimpleMDE id={id} value={value} onChange={onChange} options={options} />
+  const length = contentLength(value)
+  return (
+    <>
+      <SimpleMDE id={id} value={value} onChange={handleChange} options={options} />
+      <div className={`form-text text-end ${length > CONTENT_MAX_LENGTH ? 'text-danger fw-bold' : ''}`}>
+        {length.toLocaleString()} / {CONTENT_MAX_LENGTH.toLocaleString()}자
+      </div>
+    </>
+  )
 }

@@ -6,6 +6,7 @@ import FormErrors from '../components/FormErrors.jsx'
 import MarkdownEditor from '../components/MarkdownEditor.jsx'
 import { formatDate, loginPath } from '../utils/format.js'
 import ErrorPage from './ErrorPage.jsx'
+import { checkContentLength } from '../utils/content.js'
 import { useTitle } from '../utils/useTitle.js'
 
 // 작성자·작성일시·수정일시 표시
@@ -129,6 +130,7 @@ export default function QuestionDetail() {
 
   const submitAnswer = async (e) => {
     e.preventDefault()
+    if (!checkContentLength(content)) return
     setAnswerError(null)
     try {
       const answer = await api.post(`/questions/${id}/answers/`, { content })

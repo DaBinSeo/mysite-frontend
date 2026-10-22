@@ -189,7 +189,9 @@ export default function QuestionDetail() {
         <div className="mb-3">
           <MarkdownEditor id="content" value={content} onChange={setContent} disabled={!user} />
         </div>
-        <input type="submit" value="답변등록" className="btn btn-primary" />
+        <div className="text-end">
+          <input type="submit" value="답변등록" className="btn btn-primary" />
+        </div>
       </form>
     </div>
   )

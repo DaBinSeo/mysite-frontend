@@ -69,7 +69,9 @@ export default function QuestionForm() {
           <MarkdownEditor id="content" value={form.content}
                           onChange={(content) => setForm((f) => ({ ...f, content }))} />
         </div>
-        <button type="submit" className="btn btn-primary">저장하기</button>
+        <div className="text-end">
+          <button type="submit" className="btn btn-primary">저장하기</button>
+        </div>
       </form>
     </div>
   )

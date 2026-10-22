@@ -56,7 +56,9 @@ export default function AnswerForm() {
           <label htmlFor="content" className="form-label">답변내용</label>
           <MarkdownEditor id="content" value={content} onChange={setContent} disabled={!answer} />
         </div>
-        <button type="submit" className="btn btn-primary" disabled={!answer}>저장하기</button>
+        <div className="text-end">
+          <button type="submit" className="btn btn-primary" disabled={!answer}>저장하기</button>
+        </div>
       </form>
     </div>
   )

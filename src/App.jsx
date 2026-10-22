@@ -9,6 +9,7 @@ import Login from './pages/Login.jsx'
 import QuestionDetail from './pages/QuestionDetail.jsx'
 import QuestionForm from './pages/QuestionForm.jsx'
 import QuestionList from './pages/QuestionList.jsx'
+import RagVisualizer from './pages/RagVisualizer.jsx'
 import Signup from './pages/Signup.jsx'
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
           <Route path="/questions/:id" element={<QuestionDetail />} />
           <Route path="/questions/:id/edit" element={<RequireAuth><QuestionForm /></RequireAuth>} />
           <Route path="/answers/:id/edit" element={<RequireAuth><AnswerForm /></RequireAuth>} />
+          <Route path="/rag" element={<RagVisualizer />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="*" element={<ErrorPage status={404} />} />

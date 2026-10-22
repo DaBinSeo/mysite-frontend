@@ -30,6 +30,10 @@ export default function Navbar() {
               {/* 질문·답변 게시판 (목록·상세·작성 화면 모두 /questions 아래) */}
               <NavLink className="nav-link" to="/questions">Q&amp;A</NavLink>
             </li>
+            <li className="nav-item">
+              {/* RAG 데이터 구축 과정 시각화 (로그인 불필요) */}
+              <NavLink className="nav-link" to="/rag">RAG</NavLink>
+            </li>
           </ul>
           <ul className="navbar-nav mb-2 mb-lg-0">
             {user ? (

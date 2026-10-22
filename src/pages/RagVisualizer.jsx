@@ -10,6 +10,60 @@ const DOC_STAGES = 5
 const STAGE_DELAY_MS = 450
 const QUERY_MAX_LENGTH = 500
 
+// 단계별 전문용어 설명 (카드 하단에 보여 준다). settings는 위쪽 청킹 설정 카드용
+const TERMS = {
+  settings: [
+    ['청크 크기', '청크 하나에 담을 최대 글자 수. 실제 서비스에서는 보통 토큰 수(예: 200~1,000토큰)로 정한다.'],
+    ['겹침 (Overlap)', '앞 청크의 끝부분을 다음 청크 앞에 다시 넣는 길이. 경계에서 문맥이 끊기는 것을 줄인다.'],
+    ['top-k', '검색할 때 유사도가 가장 높은 순서대로 가져올 청크 개수 k. k=3이면 상위 3개를 고른다.'],
+  ],
+  1: [
+    ['RAG', 'Retrieval-Augmented Generation(검색 증강 생성). 질문과 관련된 문서를 먼저 찾아 언어 모델에 함께 넘겨 답변의 근거로 쓰게 하는 방식.'],
+    ['전처리', '원본 파일(PDF·HTML 등)에서 본문 텍스트만 뽑고 표·머리말·중복 공백 같은 잡음을 정리하는 단계.'],
+  ],
+  2: [
+    ['청크 (Chunk)', '검색과 저장의 기본 단위가 되는 텍스트 조각. 질문과 비교되는 대상이 문서 전체가 아니라 이 조각이다.'],
+    ['청킹 전략', '어디서 자를지 정하는 규칙. 고정 길이는 단순하지만 문장이 끊기고, 문장·문단 단위는 의미 단위를 지킨다.'],
+  ],
+  3: [
+    ['토큰 (Token)', '모델이 텍스트를 처리하는 최소 단위. 단어 하나가 여러 토큰으로 나뉘기도 하며, 모델의 입력 한도와 비용도 토큰 수로 센다.'],
+    ['BPE', 'Byte Pair Encoding. 자주 함께 나오는 글자 쌍을 하나로 합쳐 가며 어휘를 만드는 서브워드 토큰화 방법.'],
+  ],
+  4: [
+    ['임베딩 (Embedding)', '텍스트의 의미를 고정 길이 숫자 배열(벡터)로 나타낸 것. 의미가 비슷하면 벡터도 비슷해진다.'],
+    ['차원 (Dimension)', `벡터를 이루는 숫자의 개수. 여기서는 ${EMBEDDING_DIM}개이고, 실제 임베딩 모델은 보통 384~3,072차원이다.`],
+    ['정규화 (L2 Normalization)', '벡터 길이가 1이 되도록 나누는 것. 글 길이와 상관없이 방향(의미)만 비교할 수 있고, 코사인 유사도를 두 벡터의 내적으로 바로 구할 수 있다.'],
+    ['Feature hashing', '단어·글자 조각을 해시 함수로 벡터의 칸 번호에 대응시키는 방법. 이 페이지가 실제 모델 대신 쓰는 학습용 임베딩이다.'],
+  ],
+  5: [
+    ['벡터 저장소 (Vector DB)', '벡터와 원문을 함께 저장하고, 비슷한 벡터를 빠르게 찾아 주는 데이터베이스. 예: FAISS, Chroma, pgvector.'],
+    ['PCA', `Principal Component Analysis(주성분 분석). 데이터가 가장 넓게 퍼진 방향 몇 개만 남겨 차원을 줄이는 방법. 여기서는 ${EMBEDDING_DIM}차원을 2차원 그림으로 줄였다.`],
+  ],
+  6: [
+    ['코사인 유사도', '두 벡터 사이 각도의 코사인 값. 1에 가까울수록 방향(의미)이 같고, 0이면 직교(관련 없음)이고, 음수면 반대 방향이다.'],
+    ['top-k 검색', '모든 청크의 유사도를 계산해 높은 순으로 k개만 고르는 것. 청크가 아주 많으면 근사 검색(ANN)으로 속도를 높인다.'],
+  ],
+  7: [
+    ['프롬프트 (Prompt)', '언어 모델에 보내는 입력 글. 지시문, 검색한 근거 문서, 사용자 질문으로 이루어진다.'],
+    ['Augmentation / Generation', '검색한 내용을 프롬프트에 덧붙이는 것(증강)과, 모델이 그 내용을 바탕으로 답을 만드는 것(생성).'],
+    ['환각 (Hallucination)', '모델이 근거 없이 그럴듯한 거짓을 만들어 내는 현상. RAG는 근거 문서를 주어 이를 줄인다.'],
+  ],
+}
+
+// 카드 하단 용어 설명
+function Terms({ items }) {
+  return (
+    <dl className="rag-terms small mb-0">
+      {items.map(([term, desc]) => (
+        <div key={term}>
+          <dt>{term}</dt>
+          <dd>{desc}</dd>
+        </div>
+      ))}
+    </dl>
+  )
+}
+
 // 단계 카드 공통 틀
 function Stage({ step, title, desc, children }) {
   return (
@@ -22,6 +76,11 @@ function Stage({ step, title, desc, children }) {
         {desc && <p className="text-body-secondary small mb-3">{desc}</p>}
         {children}
       </div>
+      {TERMS[step] && (
+        <div className="card-footer bg-body-tertiary">
+          <Terms items={TERMS[step]} />
+        </div>
+      )}
     </section>
   )
 }
@@ -249,6 +308,9 @@ export default function RagVisualizer() {
                      value={topK} onChange={(e) => setTopK(Number(e.target.value))} />
             </div>
             <div className="col-12 small text-body-secondary">{CHUNK_STRATEGIES[options.strategy].help}</div>
+          </div>
+          <div className="card-footer bg-body-tertiary">
+            <Terms items={TERMS.settings} />
           </div>
         </div>
 

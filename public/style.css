@@ -104,3 +104,22 @@ button.rag-vector-row {
   min-width: 3.5rem;
   text-align: end;
 }
+
+/* RAG 시각화 카드 하단 용어 설명: 용어(굵게) — 설명을 한 줄씩 */
+.rag-terms > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.5rem;
+}
+.rag-terms > div + div {
+  margin-top: 0.25rem;
+}
+.rag-terms dt {
+  flex: 0 0 9rem;
+  overflow-wrap: anywhere;
+}
+.rag-terms dd {
+  flex: 1 1 16rem;
+  margin: 0;
+  color: var(--bs-secondary-color);
+}

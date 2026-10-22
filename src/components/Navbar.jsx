@@ -14,7 +14,7 @@ export default function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light border-bottom">
       <div className="container-fluid">
-        <Link className="navbar-brand" to="/">Pybo</Link>
+        <Link className="navbar-brand" to="/">seo</Link>
         <button className="navbar-toggler" type="button"
                 data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent"

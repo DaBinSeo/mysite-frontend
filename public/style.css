@@ -54,6 +54,16 @@
   background: rgba(255, 193, 7, 0.45);
   border-bottom: 2px solid #e0a800;
 }
+/* 청크 버튼으로 고른 청크: 그 범위는 진하게(색은 인라인 스타일), 나머지는 글자색만 연하게(대비 4.5:1 유지) */
+.rag-chunk-map span {
+  transition: background-color 0.2s, color 0.2s;
+}
+.rag-chunk-map .rag-dimmed {
+  color: var(--bs-secondary-color);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rag-chunk-map span { transition: none; }
+}
 .rag-chunk-btn {
   border: 1px solid var(--chunk-color);
   color: var(--chunk-color);

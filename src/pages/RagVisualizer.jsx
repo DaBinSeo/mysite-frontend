@@ -90,16 +90,37 @@ function ChunkBadge({ index }) {
 }
 
 // 원문 위에 청크 범위를 색으로 칠한다. 두 청크가 겹친 부분은 노란 형광펜 + 밑줄
-const ChunkMap = memo(function ChunkMap({ segments }) {
+// selected 청크에 속한 부분은 그 청크 색으로 진하게 칠하고 밑줄을 긋고, 나머지는 흐리게 한다
+const ChunkMap = memo(function ChunkMap({ segments, selected }) {
+  const boxRef = useRef(null)
+
+  // 선택한 청크가 원문 상자 밖(스크롤 아래)에 있으면 상자 안에서만 그 위치로 스크롤한다
+  useEffect(() => {
+    const box = boxRef.current
+    const first = box?.querySelector('[data-selected]')
+    if (!first) return
+    const top = first.offsetTop
+    if (top < box.scrollTop || top > box.scrollTop + box.clientHeight - 24) {
+      box.scrollTo({ top: Math.max(0, top - 8), behavior: 'auto' })
+    }
+  }, [selected, segments])
+
   return (
-    <div className="rag-doc border rounded p-2">
+    <div ref={boxRef} className="rag-doc rag-chunk-map border rounded p-2 position-relative">
       {segments.map((s) => {
         if (!s.covers.length) return <span key={s.start} className="text-body-tertiary">{s.text}</span>
         const overlap = s.covers.length > 1
+        const isSelected = s.covers.includes(selected)
+        const color = chunkColor(selected)
+        // CHUNK_COLORS는 6자리 hex라 뒤에 두 자리를 붙여 투명도를 준다. 겹침 구간도 선택하면 청크 색으로 칠한다(노란 밑줄은 유지)
+        const style = isSelected
+          ? { background: `${color}55`, boxShadow: `inset 0 -2px 0 ${color}` }
+          : { background: overlap ? undefined : `${chunkColor(s.covers[0])}22` }
         return (
           <span key={s.start}
-                className={overlap ? 'rag-overlap' : undefined}
-                style={overlap ? undefined : { background: `${chunkColor(s.covers[0])}22` }}
+                className={`${overlap ? 'rag-overlap' : ''} ${isSelected ? 'rag-selected' : 'rag-dimmed'}`}
+                data-selected={isSelected || undefined}
+                style={style}
                 title={`청크 ${s.covers.map((i) => `#${i + 1}`).join(', ')}`}>
             {s.text}
           </span>
@@ -336,8 +357,8 @@ export default function RagVisualizer() {
 
         {index && stage >= 2 && (
           <Stage step="2" title={`청킹 (Chunking) — ${index.chunks.length}개`}
-                 desc="검색 단위로 쓸 수 있게 문서를 조각낸다. 색은 청크, 노란 밑줄은 두 청크에 함께 들어간 겹침 부분이다. 청크를 누르면 아래 단계에서 그 청크를 자세히 본다.">
-            <ChunkMap segments={index.segments} />
+                 desc="검색 단위로 쓸 수 있게 문서를 조각낸다. 색은 청크, 노란 밑줄은 두 청크에 함께 들어간 겹침 부분이다. 청크 번호를 누르면 원문에서 그 범위를 진하게 표시하고, 아래 단계에서 그 청크를 자세히 본다.">
+            <ChunkMap segments={index.segments} selected={chunk.index} />
             <div className="d-flex flex-wrap gap-2 mt-3">
               {index.chunks.map((c) => (
                 <button key={c.index} type="button"

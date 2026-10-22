@@ -5,6 +5,7 @@ import { useAuth } from '../auth/useAuth.js'
 import FormErrors from '../components/FormErrors.jsx'
 import MarkdownEditor from '../components/MarkdownEditor.jsx'
 import ErrorPage from './ErrorPage.jsx'
+import { useTitle } from '../utils/useTitle.js'
 
 const LABELS = { subject: '제목', content: '내용' }
 
@@ -17,6 +18,7 @@ export default function QuestionForm() {
   const [form, setForm] = useState({ subject: '', content: '' })
   const [error, setError] = useState(null)
   const [loadError, setLoadError] = useState(null) // 수정할 질문 불러오기 실패
+  useTitle(loadError ? null : editing ? '질문 수정' : '질문 등록')
 
   useEffect(() => {
     if (!editing) return

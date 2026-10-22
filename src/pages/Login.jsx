@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { useAuth } from '../auth/useAuth.js'
 import FormErrors from '../components/FormErrors.jsx'
+import { useTitle } from '../utils/useTitle.js'
 
 // 로그인 (login.html). 성공하면 next(로그인 전에 보던 화면)로 이동
 export default function Login() {
@@ -11,6 +12,7 @@ export default function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
+  useTitle('로그인')
 
   const next = searchParams.get('next')
   const target = next?.startsWith('/') && !next.startsWith('//') ? next : '/' // 외부 주소로는 이동하지 않는다

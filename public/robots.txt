@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /login
+Disallow: /signup
+Disallow: /questions/new
+Disallow: /questions/*/edit
+Disallow: /answers/
+
+Sitemap: https://seo-loft.cc/sitemap.xml

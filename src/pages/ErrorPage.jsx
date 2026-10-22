@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router'
+import { useTitle } from '../utils/useTitle.js'
 
 // 상태 코드별 기본 문구 [제목, 설명]. 0은 서버에 연결하지 못한 경우(네트워크 오류)
 const MESSAGES = {
@@ -17,9 +18,12 @@ export default function ErrorPage({ status = 500, title, message }) {
   const retryable = !status || status >= 500 // 서버·네트워크 오류는 다시 시도하면 될 수 있다
   const [defaultTitle, defaultMessage] =
     MESSAGES[status ?? 0] ?? (status >= 500 ? MESSAGES[500] : MESSAGES[400])
+  useTitle(title ?? defaultTitle)
 
   return (
     <div className="container my-5 text-center">
+      {/* 서버는 모든 화면 주소에 200을 주므로, 오류 화면은 검색 결과에 올리지 않게 한다(React가 <head>로 옮긴다) */}
+      <meta name="robots" content="noindex" />
       <div className="display-1 fw-bold text-secondary">{status || '!'}</div>
       <h2 className="my-3">{title ?? defaultTitle}</h2>
       <p className="text-muted">{message ?? defaultMessage}</p>

@@ -5,6 +5,7 @@ import { useAuth } from '../auth/useAuth.js'
 import FormErrors from '../components/FormErrors.jsx'
 import MarkdownEditor from '../components/MarkdownEditor.jsx'
 import ErrorPage from './ErrorPage.jsx'
+import { useTitle } from '../utils/useTitle.js'
 
 // 답변 수정 (answer_form.html)
 export default function AnswerForm() {
@@ -15,6 +16,7 @@ export default function AnswerForm() {
   const [content, setContent] = useState('')
   const [error, setError] = useState(null)
   const [loadError, setLoadError] = useState(null) // 수정할 답변 불러오기 실패
+  useTitle(loadError ? null : '답변 수정')
 
   useEffect(() => {
     api.get(`/answers/${id}/`)

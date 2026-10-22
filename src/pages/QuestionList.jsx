@@ -4,6 +4,7 @@ import { api } from '../api/client.js'
 import Pagination from '../components/Pagination.jsx'
 import { formatDate } from '../utils/format.js'
 import ErrorPage from './ErrorPage.jsx'
+import { useTitle } from '../utils/useTitle.js'
 
 // 질문 목록 (question_list.html). 검색어와 페이지는 URL 쿼리(?kw=&page=)로 유지한다.
 export default function QuestionList() {
@@ -12,6 +13,7 @@ export default function QuestionList() {
   const page = Number(searchParams.get('page')) || 1
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
+  useTitle(error ? null : kw ? `'${kw}' 검색` : '질문 목록')
 
   useEffect(() => {
     let ignore = false

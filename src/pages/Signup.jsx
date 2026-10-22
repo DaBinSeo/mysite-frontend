@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router'
 import { api } from '../api/client.js'
 import { useAuth } from '../auth/useAuth.js'
 import FormErrors from '../components/FormErrors.jsx'
+import { useTitle } from '../utils/useTitle.js'
 
 const LABELS = { username: '사용자ID', password1: '비밀번호', password2: '비밀번호 확인', nickname: '닉네임' }
 
@@ -13,6 +14,7 @@ export default function Signup() {
   const [form, setForm] = useState({ username: '', password1: '', password2: '', nickname: '' })
   const [rules, setRules] = useState(null)
   const [error, setError] = useState(null)
+  useTitle('회원가입')
 
   useEffect(() => {
     api.get('/auth/password-rules/').then(setRules).catch(() => {})

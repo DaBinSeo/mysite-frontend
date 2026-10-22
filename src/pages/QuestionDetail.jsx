@@ -6,6 +6,7 @@ import FormErrors from '../components/FormErrors.jsx'
 import MarkdownEditor from '../components/MarkdownEditor.jsx'
 import { formatDate, loginPath } from '../utils/format.js'
 import ErrorPage from './ErrorPage.jsx'
+import { useTitle } from '../utils/useTitle.js'
 
 // 작성자·작성일시·수정일시 표시
 function Dates({ item }) {
@@ -53,6 +54,7 @@ export default function QuestionDetail() {
   const [message, setMessage] = useState(location.state?.message ?? null) // 권한 오류 등 (기존 messages)
   const [content, setContent] = useState('')
   const [answerError, setAnswerError] = useState(null)
+  useTitle(loadError ? null : question?.subject ?? '')
 
   // 답변 등록·삭제 후 다시 불러올 때 사용
   const load = useCallback(() => api.get(`/questions/${id}/`).then(setQuestion), [id])

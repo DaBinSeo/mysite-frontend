@@ -27,10 +27,10 @@ function Dates({ item }) {
   )
 }
 
-// 추천·수정·삭제 버튼 (수정·삭제는 작성자에게만)
+// 추천·수정·삭제 버튼 (수정·삭제는 작성자에게만). 모바일(md 미만)에서는 오른쪽 정렬
 function Actions({ item, isAuthor, editPath, onVote, onDelete }) {
   return (
-    <div className="my-3">
+    <div className="my-3 text-end text-md-start">
       <button type="button" className="btn btn-sm btn-outline-secondary me-1" onClick={onVote}>
         추천 <span className="badge rounded-pill bg-success">{item.voter_count}</span>
       </button>

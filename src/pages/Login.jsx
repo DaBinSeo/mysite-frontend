@@ -43,7 +43,9 @@ export default function Login() {
           <input type="password" className="form-control" name="password" id="password"
                  autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
-        <button type="submit" className="btn btn-primary">로그인</button>
+        <div className="text-end">
+          <button type="submit" className="btn btn-primary">로그인</button>
+        </div>
       </form>
     </div>
   )

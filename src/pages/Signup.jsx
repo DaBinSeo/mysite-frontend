@@ -68,7 +68,9 @@ export default function Signup() {
             한글·영문·숫자만 쓸 수 있습니다(공백·특수문자 불가). 한글이 들어가면 2자, 아니면 3자 이상.
           </div>
         </div>
-        <button type="submit" className="btn btn-primary">생성하기</button>
+        <div className="text-end">
+          <button type="submit" className="btn btn-primary">생성하기</button>
+        </div>
       </form>
     </div>
   )

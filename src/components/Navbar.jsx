@@ -23,7 +23,8 @@ export default function Navbar() {
                 aria-label="Toggle navigation">
           <span className="navbar-toggler-icon"></span>
         </button>
-        <div className="collapse navbar-collapse" id="navbarSupportedContent">
+        {/* 접힌 메뉴(lg 미만)는 오른쪽 정렬, 펼친 가로 메뉴는 기본 배치 */}
+        <div className="collapse navbar-collapse text-end text-lg-start" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
               {/* 질문·답변 게시판 (목록·상세·작성 화면 모두 /questions 아래) */}
@@ -33,7 +34,7 @@ export default function Navbar() {
           <ul className="navbar-nav mb-2 mb-lg-0">
             {user ? (
               <li className="nav-item">
-                <button type="button" className="nav-link btn btn-link" onClick={handleLogout}>
+                <button type="button" className="nav-link btn btn-link ms-auto ms-lg-0" onClick={handleLogout}>
                   {user.nickname} (로그아웃)
                 </button>
               </li>

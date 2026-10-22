@@ -49,12 +49,12 @@ export default function QuestionList() {
 
   return (
     <div className="container my-3">
-      {/* 모바일에서는 버튼과 검색창을 위아래로 쌓는다 */}
+      {/* 등록 버튼은 오른쪽. 모바일에서는 버튼을 위에 쌓고, md 이상에서는 검색창 왼쪽·버튼 오른쪽 */}
       <div className="row g-2 my-3">
-        <div className="col-12 col-md-6">
+        <div className="col-12 col-md-6 order-md-2 text-end">
           <Link to="/questions/new" className="btn btn-primary">질문 등록하기</Link>
         </div>
-        <div className="col-12 col-md-6">
+        <div className="col-12 col-md-6 order-md-1">
           <form onSubmit={handleSearch} key={kw}>
             <div className="input-group">
               <input type="text" name="kw" className="form-control" defaultValue={kw} aria-label="검색어" />

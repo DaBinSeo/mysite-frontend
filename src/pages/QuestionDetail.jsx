@@ -12,9 +12,9 @@ import { useTitle } from '../utils/useTitle.js'
 // 작성자·작성일시·수정일시 표시
 function Dates({ item }) {
   return (
-    <div className="d-flex justify-content-end">
+    <div className="d-flex flex-wrap justify-content-end gap-2">
       {item.modify_date && (
-        <div className="badge bg-light text-dark p-2 text-start mx-3">
+        <div className="badge bg-light text-dark p-2 text-start">
           <div className="mb-2">modified at</div>
           <div>{formatDate(item.modify_date)}</div>
         </div>
@@ -159,11 +159,11 @@ export default function QuestionDetail() {
         </div>
       )}
       {/* 질문 */}
-      <h2 className="border-bottom py-2">{question.subject}</h2>
+      <h2 className="border-bottom py-2 text-break">{question.subject}</h2>
       <div className="card my-3">
         <div className="card-body">
           {/* content_html은 서버에서 nh3로 정리한 HTML */}
-          <div className="card-text" dangerouslySetInnerHTML={{ __html: question.content_html }} />
+          <div className="card-text markdown-body" dangerouslySetInnerHTML={{ __html: question.content_html }} />
           <Dates item={question} />
           <Actions item={question} isAuthor={user?.id === question.author_id}
                    editPath={`/questions/${question.id}/edit`}
@@ -175,7 +175,7 @@ export default function QuestionDetail() {
       {question.answers.map((answer) => (
         <div className="card my-3" key={answer.id} id={`answer_${answer.id}`}>
           <div className="card-body">
-            <div className="card-text" dangerouslySetInnerHTML={{ __html: answer.content_html }} />
+            <div className="card-text markdown-body" dangerouslySetInnerHTML={{ __html: answer.content_html }} />
             <Dates item={answer} />
             <Actions item={answer} isAuthor={user?.id === answer.author_id}
                      editPath={`/answers/${answer.id}/edit`}

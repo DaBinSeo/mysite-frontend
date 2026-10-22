@@ -13,7 +13,7 @@ export default function Pagination({ page, numPages, onChange }) {
   )
 
   return (
-    <ul className="pagination justify-content-center">
+    <ul className="pagination flex-wrap justify-content-center">
       {/* 이전페이지 */}
       {item('이전', page - 1, { disabled: page <= 1 })}
       {/* 페이지리스트 */}

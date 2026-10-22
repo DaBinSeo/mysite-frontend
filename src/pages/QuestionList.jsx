@@ -49,11 +49,12 @@ export default function QuestionList() {
 
   return (
     <div className="container my-3">
-      <div className="row my-3">
-        <div className="col-6">
+      {/* 모바일에서는 버튼과 검색창을 위아래로 쌓는다 */}
+      <div className="row g-2 my-3">
+        <div className="col-12 col-md-6">
           <Link to="/questions/new" className="btn btn-primary">질문 등록하기</Link>
         </div>
-        <div className="col-6">
+        <div className="col-12 col-md-6">
           <form onSubmit={handleSearch} key={kw}>
             <div className="input-group">
               <input type="text" name="kw" className="form-control" defaultValue={kw} aria-label="검색어" />
@@ -62,13 +63,14 @@ export default function QuestionList() {
           </form>
         </div>
       </div>
+      {/* 좁은 화면(md 미만)에서는 제목 열만 남기고 글쓴이·작성일시는 제목 아래에 작게 표시한다 */}
       <table className="table">
         <thead>
           <tr className="text-center table-dark">
-            <th>번호</th>
-            <th style={{ width: '50%' }}>제목</th>
-            <th>글쓴이</th>
-            <th>작성일시</th>
+            <th className="d-none d-md-table-cell">번호</th>
+            <th className="question-subject">제목</th>
+            <th className="d-none d-md-table-cell">글쓴이</th>
+            <th className="d-none d-md-table-cell">작성일시</th>
           </tr>
         </thead>
         <tbody>
@@ -76,15 +78,18 @@ export default function QuestionList() {
             data.results.map((question, index) => (
               <tr className="text-center" key={question.id}>
                 {/* 번호 = 전체건수 - 시작인덱스 - 현재인덱스 + 1 */}
-                <td>{data.count - data.start_index - index + 1}</td>
-                <td className="text-start">
+                <td className="d-none d-md-table-cell">{data.count - data.start_index - index + 1}</td>
+                <td className="text-start text-break">
                   <Link to={`/questions/${question.id}`}>{question.subject}</Link>
                   {question.answer_count > 0 && (
                     <span className="text-danger small mx-2">{question.answer_count}</span>
                   )}
+                  <div className="d-md-none small text-body-secondary">
+                    {question.author} · {formatDate(question.create_date)}
+                  </div>
                 </td>
-                <td>{question.author}</td>
-                <td>{formatDate(question.create_date)}</td>
+                <td className="d-none d-md-table-cell text-nowrap">{question.author}</td>
+                <td className="d-none d-md-table-cell text-nowrap">{formatDate(question.create_date)}</td>
               </tr>
             ))
           ) : (

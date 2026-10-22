@@ -32,7 +32,8 @@ export default function ErrorPage({ status = 500, title, message }) {
           : retryable ? '문제가 계속되면 잠시 후 다시 접속해 주세요.'
           : '아래 버튼으로 이동해 주세요.'}
       </p>
-      <div className="d-flex justify-content-center gap-2 mt-4">
+      {/* 좁은 화면에서는 버튼 글자를 끊지 않고 버튼째 다음 줄로 넘긴다 */}
+      <div className="d-flex flex-wrap justify-content-center gap-2 mt-4 text-nowrap">
         <Link to="/questions" className="btn btn-primary">질문 목록으로</Link>
         <button type="button" className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
           이전 페이지로

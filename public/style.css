@@ -207,3 +207,124 @@ button.rag-vector-row {
   background: #146c43;
   color: #fff;
 }
+
+/* LLM 구축 과정 화면 공용: 히트맵(칸만 또는 숫자 포함) */
+.llm-grid {
+  border-collapse: separate;
+  border-spacing: 1px;
+}
+.llm-grid th {
+  padding: 0 0.3rem;
+  font-weight: normal;
+  color: var(--bs-secondary-color);
+}
+.llm-grid td {
+  width: 14px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0;
+  background: var(--bs-tertiary-bg);
+}
+.llm-grid-values td {
+  width: auto;
+  min-width: 3rem;
+  height: auto;
+  padding: 0.2rem 0.35rem;
+  text-align: center;
+}
+.llm-grid td.llm-grid-masked {
+  background: repeating-linear-gradient(45deg, var(--bs-tertiary-bg), var(--bs-tertiary-bg) 3px, var(--bs-secondary-bg) 3px, var(--bs-secondary-bg) 6px);
+  color: var(--bs-secondary-color);
+}
+.llm-grid tr.llm-grid-active th {
+  color: var(--bs-body-color);
+  font-weight: bold;
+}
+.llm-grid tr.llm-grid-active td {
+  outline: 2px solid #212529;
+  outline-offset: -1px;
+}
+
+/* 가로 막대: 이름 | 막대 | 값 */
+.llm-bar-row {
+  display: grid;
+  grid-template-columns: minmax(4rem, 9rem) minmax(0, 1fr) 4rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1px 0;
+}
+.llm-bar-row.llm-bar-nolabel {
+  grid-template-columns: minmax(0, 1fr) 4rem;
+}
+.llm-bar-track {
+  height: 0.9rem;
+  border-radius: 0.2rem;
+  background: var(--bs-tertiary-bg);
+  overflow: hidden;
+}
+.llm-bar-fill {
+  height: 100%;
+  background: #0b5ed7;
+  transition: width 0.2s;
+}
+.llm-bar-fill.llm-bar-success { background: #146c43; }
+.llm-bar-fill.llm-bar-danger { background: #b02a37; }
+.llm-bar-muted .llm-bar-fill { background: var(--bs-secondary-bg); }
+.llm-bar-muted .llm-bar-label,
+.llm-bar-muted .llm-bar-value {
+  color: var(--bs-secondary-color);
+  text-decoration: line-through;
+}
+.llm-bar-value {
+  text-align: end;
+}
+@media (prefers-reduced-motion: reduce) {
+  .llm-bar-fill { transition: none; }
+}
+
+/* 선 그래프 */
+.llm-chart {
+  width: 100%;
+  height: auto;
+  max-height: 260px;
+}
+.llm-chart-grid {
+  stroke: var(--bs-border-color);
+  stroke-dasharray: 3 3;
+}
+.llm-chart-marker {
+  stroke: #212529;
+  stroke-width: 1.5;
+}
+.llm-chart-text {
+  font-size: 12px;
+  fill: var(--bs-secondary-color);
+}
+.llm-legend {
+  display: inline-block;
+  width: 0.8rem;
+  height: 0.3rem;
+  vertical-align: middle;
+  border-radius: 0.15rem;
+}
+
+/* 임베딩 의미 공간의 점(키보드로 고를 수 있음) */
+.llm-point {
+  cursor: pointer;
+}
+.llm-point:focus-visible {
+  outline: 2px solid #0b5ed7;
+}
+
+/* 전체 흐름 지도: 단계 카드 */
+.llm-flow-card {
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.llm-flow-card:hover,
+.llm-flow-card:focus-visible {
+  border-color: #0b5ed7;
+  box-shadow: 0 0 0 0.15rem rgba(11, 94, 215, 0.25);
+}
+@media (prefers-reduced-motion: reduce) {
+  .llm-flow-card { transition: none; }
+}

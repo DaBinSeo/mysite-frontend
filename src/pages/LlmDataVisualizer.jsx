@@ -1,4 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import { LlmStepNav } from '../components/LlmViz.jsx'
 import { StageCard, Terms } from '../components/VizStage.jsx'
 import {
   BPE_MAX_MERGES, CORPUS_MAX_LENGTH, DEFAULT_OPTIONS, MAX_DOCS, PII_LABELS, PREFERENCE_SAMPLE,
@@ -529,6 +530,7 @@ export default function LlmDataVisualizer() {
           <p className="small text-body-secondary mt-2 mb-0">{PREFERENCE_SAMPLE.note}</p>
         </Stage>
       )}
+      <LlmStepNav path="/llm/data" />
     </div>
   )
 }

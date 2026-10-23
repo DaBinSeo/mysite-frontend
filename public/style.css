@@ -328,3 +328,40 @@ button.rag-vector-row {
 @media (prefers-reduced-motion: reduce) {
   .llm-flow-card { transition: none; }
 }
+
+/* 네비게이션바: 좁은 화면(lg 미만)의 햄버거 메뉴는 본문을 밀어내지 않고 본문 위에 겹쳐 연다 */
+.navbar-overlay {
+  position: relative;
+  z-index: 1030;
+}
+@media (max-width: 991.98px) {
+  .navbar-overlay .navbar-collapse {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: calc(100dvh - 4rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0.5rem 1rem;
+    background: var(--bs-light);
+    border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  }
+  .navbar-overlay .navbar-collapse.show {
+    animation: navbar-drop 0.15s ease-out;
+  }
+}
+.navbar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1029;
+  background: rgba(0, 0, 0, 0.25);
+}
+@keyframes navbar-drop {
+  from { opacity: 0; transform: translateY(-0.5rem); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .navbar-overlay .navbar-collapse.show { animation: none; }
+}

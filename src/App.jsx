@@ -1,5 +1,5 @@
-import { Suspense } from 'react'
-import { Navigate, Route, Routes, useLocation } from 'react-router'
+import { Suspense, useLayoutEffect, useRef } from 'react'
+import { Navigate, Route, Routes, useLocation, useNavigationType } from 'react-router'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import Navbar from './components/Navbar.jsx'
 import RequireAuth from './components/RequireAuth.jsx'
@@ -34,11 +34,29 @@ function PageLoading() {
   )
 }
 
+// BrowserRouter는 화면을 바꿔도 스크롤을 그대로 두므로, 링크·navigate()로 다른 화면에 가면 맨 위로 올린다.
+// 뒤로·앞으로 가기(POP)는 브라우저가 이전 위치를 되살리게 두고, 주소의 쿼리만 바뀔 때(목록 페이지 이동·검색)는 그대로 둔다
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  const navigationType = useNavigationType()
+  // 경로가 실제로 바뀐 경우만 처리한다(navigationType만 바뀐 경우와 첫 렌더링은 건너뜀)
+  const prevPathname = useRef(pathname)
+
+  useLayoutEffect(() => {
+    if (pathname === prevPathname.current) return
+    prevPathname.current = pathname
+    if (navigationType !== 'POP') window.scrollTo(0, 0)
+  }, [pathname, navigationType])
+
+  return null
+}
+
 function App() {
   const location = useLocation()
 
   return (
     <>
+      <ScrollToTop />
       <Navbar />
       {/* 주소가 바뀌면 오류 상태를 초기화한다 */}
       <ErrorBoundary key={location.pathname}>

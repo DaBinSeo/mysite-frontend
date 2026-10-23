@@ -211,7 +211,7 @@ function InputBar({ mode, setMode, canQuery, onSubmitDoc, onSubmitQuery }) {
     <form className="rag-input position-fixed bottom-0 start-0 end-0 bg-body border-top" onSubmit={handleSubmit}>
       <div className="container py-2">
         <div className="d-flex align-items-center gap-2 mb-2">
-          <div className="btn-group btn-group-sm" role="group" aria-label="입력 종류">
+          <div className="btn-group btn-group-sm text-nowrap" role="group" aria-label="입력 종류">
             <button type="button" className={`btn btn-outline-secondary ${mode === 'doc' ? 'active' : ''}`}
                     aria-pressed={mode === 'doc'} onClick={() => setMode('doc')}>문서 넣기</button>
             <button type="button" className={`btn btn-outline-secondary ${mode === 'query' ? 'active' : ''}`}

@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation } from 'react-router'
+import { Navigate, Route, Routes, useLocation } from 'react-router'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import Navbar from './components/Navbar.jsx'
 import RequireAuth from './components/RequireAuth.jsx'
@@ -27,7 +27,9 @@ function App() {
           <Route path="/questions/:id" element={<QuestionDetail />} />
           <Route path="/questions/:id/edit" element={<RequireAuth><QuestionForm /></RequireAuth>} />
           <Route path="/answers/:id/edit" element={<RequireAuth><AnswerForm /></RequireAuth>} />
-          <Route path="/rag" element={<RagVisualizer />} />
+          {/* RAG 메뉴의 하위 화면. /rag는 첫 화면(데이터 구축 과정)으로 보낸다 */}
+          <Route path="/rag" element={<Navigate to="/rag/build" replace />} />
+          <Route path="/rag/build" element={<RagVisualizer />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="*" element={<ErrorPage status={404} />} />

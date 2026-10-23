@@ -373,7 +373,12 @@ export default function LlmDataVisualizer() {
       {pipeline && stage >= 4 && (
         <Stage step="4" title={`개인정보 마스킹 — ${piiDocs.reduce((n, d) => n + d.pii.hits, 0)}건`}
                desc="남은 문서에서 이메일·전화번호·주민등록번호 패턴을 찾아 자리표시 글자로 바꾼다.">
-          {piiDocs.length === 0 && <p className="small text-body-secondary mb-0">개인정보 패턴이 발견되지 않았습니다.</p>}
+          {piiDocs.length === 0 && (
+            <p className="small text-body-secondary mb-0">
+              개인정보 패턴이 발견되지 않았습니다.
+              {corpus === SAMPLE_CORPUS && ' 예시 문서에는 개인정보를 넣지 않았습니다. 직접 입력한 문서에 이메일·전화번호 등이 있으면 여기서 가려진 결과를 볼 수 있습니다.'}
+            </p>
+          )}
           {piiDocs.map((d) => (
             <div key={d.index} className="border rounded p-2 mb-2 small">
               <div className="mb-1"><DocBadge index={d.index} /></div>

@@ -2,10 +2,15 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router'
 import { useAuth } from '../auth/useAuth.js'
 
-// RAG 하위 메뉴 (화면은 모두 /rag 아래, 로그인 불필요).
+// 드롭다운 메뉴 목록 (화면은 각각 base 경로 아래, 로그인 불필요)
+const MENUS = [
+  { id: 'llm-menu', label: 'LLM', base: '/llm', items: [{ to: '/llm/data', label: '학습 데이터 구축 과정 시각화' }] },
+  { id: 'rag-menu', label: 'RAG', base: '/rag', items: [{ to: '/rag/build', label: '데이터 구축 과정 시각화' }] },
+]
+
 // public/bootstrap.min.js에는 Popper가 없어 Bootstrap 드롭다운 JS가 동작하지 않으므로 열림 상태를 직접 관리한다.
 // 네비게이션바 안의 .dropdown-menu는 CSS만으로 위치가 잡힌다(넓은 화면은 아래로 펼침, 접힌 메뉴는 목록 안에 표시)
-function RagMenu() {
+function DropdownMenu({ id, label, base, items }) {
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
   const [prevPathname, setPrevPathname] = useState(pathname)
@@ -39,16 +44,18 @@ function RagMenu() {
 
   return (
     <li className="nav-item dropdown" ref={itemRef}>
-      <button type="button" ref={buttonRef} aria-expanded={open} aria-controls="rag-menu"
-              className={`nav-link dropdown-toggle ms-auto ms-lg-0 ${pathname === '/rag' || pathname.startsWith('/rag/') ? 'active' : ''}`}
+      <button type="button" ref={buttonRef} aria-expanded={open} aria-controls={id}
+              className={`nav-link dropdown-toggle ms-auto ms-lg-0 ${pathname === base || pathname.startsWith(`${base}/`) ? 'active' : ''}`}
               onClick={() => setOpen((o) => !o)}>
-        RAG
+        {label}
       </button>
       {/* 접힌 메뉴(lg 미만)에서는 다른 메뉴처럼 오른쪽 정렬 */}
-      <ul id="rag-menu" className={`dropdown-menu text-end text-lg-start ${open ? 'show' : ''}`}>
-        <li>
-          <NavLink className="dropdown-item" to="/rag/build" onClick={() => setOpen(false)}>데이터 구축 과정 시각화</NavLink>
-        </li>
+      <ul id={id} className={`dropdown-menu text-end text-lg-start ${open ? 'show' : ''}`}>
+        {items.map((item) => (
+          <li key={item.to}>
+            <NavLink className="dropdown-item" to={item.to} onClick={() => setOpen(false)}>{item.label}</NavLink>
+          </li>
+        ))}
       </ul>
     </li>
   )
@@ -83,7 +90,7 @@ export default function Navbar() {
               {/* 질문·답변 게시판 (목록·상세·작성 화면 모두 /questions 아래) */}
               <NavLink className="nav-link" to="/questions">Q&amp;A</NavLink>
             </li>
-            <RagMenu />
+            {MENUS.map((menu) => <DropdownMenu key={menu.id} {...menu} />)}
           </ul>
           <ul className="navbar-nav mb-2 mb-lg-0">
             {user ? (

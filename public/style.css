@@ -146,3 +146,64 @@ button.rag-vector-row {
 .rag-scroll-target {
   scroll-margin-top: 1rem;
 }
+
+/* LLM 학습 데이터 시각화 */
+.llm-doc {
+  max-height: 160px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: inherit;
+  font-size: 0.8rem;
+  line-height: 1.7;
+}
+.llm-heatmap th,
+.llm-heatmap td {
+  padding: 0.25rem 0.4rem;
+  text-align: center;
+  min-width: 3rem;
+}
+/* 유사도가 기준 이상인 쌍(중복으로 지울 대상) */
+.llm-heatmap td.llm-dup {
+  outline: 2px solid #212529;
+  outline-offset: -2px;
+  font-weight: bold;
+}
+.llm-pii {
+  padding: 0 0.2rem;
+  border-radius: 0.25rem;
+  background: rgba(255, 193, 7, 0.45);
+}
+.llm-merges {
+  max-height: 240px;
+  overflow-y: auto;
+  padding-left: 2.2rem;
+}
+.llm-block-label {
+  min-width: 3.5rem;
+}
+.rag-token.llm-token-special {
+  background: #212529;
+  border-color: #212529;
+  color: #fff;
+}
+.rag-token.llm-token-unk {
+  border-style: dashed;
+}
+/* 손실 마스크: 학습하지 않는 토큰은 글자색만 연하게(대비 4.5:1 유지), 학습하는 토큰은 초록 */
+.rag-token.llm-token-masked {
+  border-color: var(--bs-border-color);
+  color: var(--bs-secondary-color);
+}
+.rag-token.llm-token-masked.llm-token-special {
+  background: var(--bs-secondary-bg);
+}
+.rag-token.llm-token-train {
+  background: #d1e7dd;
+  border-color: #146c43;
+  color: #0a3622;
+}
+.rag-token.llm-token-train.llm-token-special {
+  background: #146c43;
+  color: #fff;
+}

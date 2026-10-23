@@ -5,6 +5,7 @@ import RequireAuth from './components/RequireAuth.jsx'
 import AnswerForm from './pages/AnswerForm.jsx'
 import ErrorPage from './pages/ErrorPage.jsx'
 import Home from './pages/Home.jsx'
+import LlmDataVisualizer from './pages/LlmDataVisualizer.jsx'
 import Login from './pages/Login.jsx'
 import QuestionDetail from './pages/QuestionDetail.jsx'
 import QuestionForm from './pages/QuestionForm.jsx'
@@ -27,7 +28,9 @@ function App() {
           <Route path="/questions/:id" element={<QuestionDetail />} />
           <Route path="/questions/:id/edit" element={<RequireAuth><QuestionForm /></RequireAuth>} />
           <Route path="/answers/:id/edit" element={<RequireAuth><AnswerForm /></RequireAuth>} />
-          {/* RAG 메뉴의 하위 화면. /rag는 첫 화면(데이터 구축 과정)으로 보낸다 */}
+          {/* LLM·RAG 메뉴의 하위 화면. /llm, /rag는 각 메뉴의 첫 화면으로 보낸다 */}
+          <Route path="/llm" element={<Navigate to="/llm/data" replace />} />
+          <Route path="/llm/data" element={<LlmDataVisualizer />} />
           <Route path="/rag" element={<Navigate to="/rag/build" replace />} />
           <Route path="/rag/build" element={<RagVisualizer />} />
           <Route path="/login" element={<Login />} />

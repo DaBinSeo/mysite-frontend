@@ -1,4 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
+import { StageCard, Terms } from '../components/VizStage.jsx'
 import {
   CHUNK_STRATEGIES, DOC_MAX_LENGTH, EMBEDDING_DIM, SAMPLE_DOC,
   buildIndex, buildPrompt, chunkColor, search,
@@ -55,39 +56,9 @@ const TERMS = {
   ],
 }
 
-// 카드 하단 용어 설명
-function Terms({ items }) {
-  return (
-    <dl className="rag-terms small mb-0">
-      {items.map(([term, desc]) => (
-        <div key={term}>
-          <dt>{term}</dt>
-          <dd>{desc}</dd>
-        </div>
-      ))}
-    </dl>
-  )
-}
-
-// 단계 카드 공통 틀
-function Stage({ step, title, desc, children }) {
-  return (
-    <section className="card mb-3 rag-stage">
-      <div className="card-header d-flex align-items-baseline gap-2">
-        <span className="badge text-bg-dark">{step}</span>
-        <strong>{title}</strong>
-      </div>
-      <div className="card-body">
-        {desc && <p className="text-body-secondary small mb-3">{desc}</p>}
-        {children}
-      </div>
-      {TERMS[step] && (
-        <div className="card-footer bg-body-tertiary">
-          <Terms items={TERMS[step]} />
-        </div>
-      )}
-    </section>
-  )
+// 단계 카드: 번호에 맞는 용어 설명을 붙인다
+function Stage(props) {
+  return <StageCard {...props} terms={TERMS[props.step]} />
 }
 
 function ChunkBadge({ index }) {

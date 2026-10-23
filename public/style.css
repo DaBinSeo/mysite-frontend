@@ -116,20 +116,28 @@ button.rag-vector-row {
 }
 
 /* RAG 시각화 카드 하단 용어 설명: 용어(굵게) — 설명을 한 줄씩 */
-.rag-terms > div {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 0.5rem;
+/* 용어 열은 카드 안에서 가장 긴 용어 폭에 맞추고 용어는 줄바꿈하지 않는다. 좁은 화면은 용어 아래에 설명 */
+.rag-terms {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0.25rem 1rem;
 }
-.rag-terms > div + div {
-  margin-top: 0.25rem;
+.rag-terms > div {
+  display: contents;
 }
 .rag-terms dt {
-  flex: 0 0 9rem;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 .rag-terms dd {
-  flex: 1 1 16rem;
   margin: 0;
   color: var(--bs-secondary-color);
+}
+@media (max-width: 575.98px) {
+  .rag-terms {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .rag-terms > div:not(:last-child) dd {
+    margin-bottom: 0.375rem;
+  }
 }

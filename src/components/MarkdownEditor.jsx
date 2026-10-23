@@ -1,7 +1,13 @@
-import { useEffect, useMemo, useRef } from 'react'
-import SimpleMDE from 'react-simplemde-editor'
-import 'easymde/dist/easymde.min.css'
+import { Suspense, useEffect, useMemo, useRef } from 'react'
 import { CONTENT_MAX_LENGTH, checkContentLength, contentLength } from '../utils/content.js'
+import { lazyWithReload } from '../utils/lazyLoad.js'
+
+// EasyMDE(CodeMirror 포함)는 크기가 커서 편집기를 처음 그릴 때만 내려받는다
+const SimpleMDE = lazyWithReload(() => Promise.all([
+  import('react-simplemde-editor'),
+  // CSS만 실패하면 모양이 덜 꾸며질 뿐 입력은 되므로 무시한다
+  import('easymde/dist/easymde.min.css').catch(() => {}),
+]).then(([module]) => module))
 
 // 마크다운 입력기 (EasyMDE). 화면 출력은 여전히 서버의 content_html만 쓴다
 export default function MarkdownEditor({ id, value, onChange, disabled }) {
@@ -34,7 +40,11 @@ export default function MarkdownEditor({ id, value, onChange, disabled }) {
   const length = contentLength(value)
   return (
     <>
-      <SimpleMDE id={id} value={value} onChange={handleChange} options={options} />
+      {/* 받는 동안은 일반 입력칸으로 입력을 받는다 */}
+      <Suspense fallback={<textarea className="form-control" id={id} rows="10" value={value}
+                                    onChange={(e) => handleChange(e.target.value)} />}>
+        <SimpleMDE id={id} value={value} onChange={handleChange} options={options} />
+      </Suspense>
       <div className={`form-text text-end ${length > CONTENT_MAX_LENGTH ? 'text-danger fw-bold' : ''}`}>
         {length.toLocaleString()} / {CONTENT_MAX_LENGTH.toLocaleString()}자
       </div>

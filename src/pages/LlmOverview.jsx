@@ -1,7 +1,6 @@
-import { Link } from 'react-router'
 import { LlmPage } from '../components/LlmViz.jsx'
-import { Terms } from '../components/VizStage.jsx'
-import { LLM_STEPS, stepTitle } from '../utils/llmSteps.js'
+import { FlowMap, Terms } from '../components/VizStage.jsx'
+import { LLM_STEPS } from '../utils/llmSteps.js'
 
 const TERMS = [
   ['LLM', 'Large Language Model(대규모 언어 모델). 수많은 문장으로 다음 토큰을 맞히도록 학습한, 수십억 개 이상의 매개변수를 가진 트랜스포머 모델.'],
@@ -10,43 +9,12 @@ const TERMS = [
   ['추론 (Inference)', '학습이 끝난 모델로 실제 답을 만들어 내는 것. 서비스 비용 대부분이 여기서 든다.'],
 ]
 
-// 단계를 묶음(group)별로 모은다
-const GROUPS = LLM_STEPS.slice(1).reduce((acc, step) => {
-  const last = acc.at(-1)
-  if (last?.group === step.group) last.steps.push(step)
-  else acc.push({ group: step.group, steps: [step] })
-  return acc
-}, [])
-
 // LLM 구축 전체 흐름 지도 (단계 카드를 누르면 해당 화면으로 이동)
 export default function LlmOverview() {
   return (
     <LlmPage path="/llm/overview"
              intro="LLM은 데이터 → 모델 구조 → 학습 → 평가·배포 순서로 만들어집니다. 카드를 누르면 각 단계를 직접 계산해 보는 화면으로 이동합니다.">
-      {GROUPS.map(({ group, steps }, g) => (
-        <section key={group} className="mb-3">
-          <h5 className="h6 d-flex align-items-center gap-2">
-            <span className="badge text-bg-dark">{String.fromCharCode(65 + g)}</span> {group}
-          </h5>
-          <div className="row g-2">
-            {steps.map((step) => (
-              <div key={step.path} className="col-12 col-md-6 col-lg-4">
-                <Link to={step.path} className="card h-100 text-reset text-decoration-none llm-flow-card">
-                  <div className="card-body">
-                    <div className="fw-bold mb-1">{stepTitle(step)}</div>
-                    <p className="small text-body-secondary mb-2">{step.desc}</p>
-                    <div className="small d-flex flex-wrap align-items-center gap-1">
-                      <span className="border rounded px-1 bg-body-tertiary">{step.input}</span>
-                      <span className="text-body-tertiary" aria-label="에서">→</span>
-                      <span className="border rounded px-1 bg-body-tertiary fw-bold">{step.output}</span>
-                    </div>
-                  </div>
-                </Link>
-              </div>
-            ))}
-          </div>
-        </section>
-      ))}
+      <FlowMap steps={LLM_STEPS} />
       <div className="card">
         <div className="card-body small">
           <p className="mb-2">

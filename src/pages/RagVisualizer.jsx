@@ -1,15 +1,19 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
+import { RagStepNav } from '../components/RagViz.jsx'
 import { StageCard, Terms } from '../components/VizStage.jsx'
 import {
   CHUNK_STRATEGIES, DOC_MAX_LENGTH, EMBEDDING_DIM, SAMPLE_DOC,
   buildIndex, buildPrompt, chunkColor, search,
 } from '../utils/rag.js'
+import { RAG_STEPS } from '../utils/ragSteps.js'
 import { useTitle } from '../utils/useTitle.js'
+import { stepTitle } from '../utils/vizSteps.js'
 
 // 문서를 넣으면 단계가 하나씩 차례로 나타난다 (원문 → 청킹 → 토큰화 → 임베딩 → 벡터 공간)
 const DOC_STAGES = 5
 const STAGE_DELAY_MS = 450
 const QUERY_MAX_LENGTH = 500
+const STEP = RAG_STEPS.find((s) => s.path === '/rag/build')
 
 // 움직임 줄이기 설정이면 부드러운 스크롤 대신 바로 이동한다
 function scrollBehavior() {
@@ -214,7 +218,7 @@ function InputBar({ mode, setMode, canQuery, onSubmitDoc, onSubmitQuery }) {
 
 // RAG 데이터 구축 과정 시각화 (로그인 불필요, 계산은 모두 브라우저에서 한다)
 export default function RagVisualizer() {
-  useTitle('RAG 시각화')
+  useTitle(`RAG ${stepTitle(STEP)}`)
   const [doc, setDoc] = useState('')
   const [options, setOptions] = useState({ strategy: 'sentence', size: 120, overlap: 30 })
   const [topK, setTopK] = useState(3)
@@ -284,7 +288,7 @@ export default function RagVisualizer() {
   return (
     <div className="rag-page">
       <div className="container my-3">
-        <h4 className="border-bottom pb-2">RAG 데이터 구축 과정 시각화</h4>
+        <h4 className="border-bottom pb-2">{stepTitle(STEP)}</h4>
         <p className="text-body-secondary small">
           하단 입력창에 문서를 넣으면 청킹 → 토큰화 → 임베딩 → 벡터 공간 순서로 처리 과정을 보여 줍니다.
           그다음 질문을 입력하면 비슷한 청크를 찾아 프롬프트를 만드는 검색 단계까지 볼 수 있습니다.
@@ -437,6 +441,8 @@ export default function RagVisualizer() {
             </Stage>
           </div>
         )}
+
+        <RagStepNav path="/rag/build" />
       </div>
 
       <InputBar mode={mode} setMode={setMode} canQuery={canQuery}

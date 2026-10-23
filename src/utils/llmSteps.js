@@ -1,3 +1,5 @@
+import { stepMenuItems } from './vizSteps.js'
+
 // LLM 메뉴의 화면 목록. 네비게이션 드롭다운·전체 흐름 화면·이전/다음 버튼이 이 순서를 함께 쓴다
 export const LLM_STEPS = [
   {
@@ -51,12 +53,4 @@ export const LLM_STEPS = [
   },
 ]
 
-export function stepTitle(step) {
-  return step.num ? `${step.num}. ${step.label}` : step.label
-}
-
-// 드롭다운 항목: 묶음(group)이 바뀌는 곳마다 제목을 끼운다
-export const LLM_MENU_ITEMS = LLM_STEPS.flatMap((step, i) => [
-  ...(i === 0 || LLM_STEPS[i - 1].group !== step.group ? [{ header: step.group }] : []),
-  { to: step.path, label: stepTitle(step) },
-])
+export const LLM_MENU_ITEMS = stepMenuItems(LLM_STEPS)

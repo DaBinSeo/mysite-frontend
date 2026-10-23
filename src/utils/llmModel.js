@@ -1,19 +1,13 @@
 // LLM 구축 과정(임베딩·어텐션·학습·정렬·평가·디코딩·서빙) 화면에서 함께 쓰는 학습용 계산 모음.
 // 실제 트랜스포머 대신 브라우저에서 1초 안에 학습되는 작은 모델(앞 K개 단어를 보고 다음 단어를 맞히는 선형 모델)을 쓴다.
 
-// ---------- 난수 (같은 시드면 늘 같은 결과) ----------
+import { pct } from './format.js'
+import { makeRng } from './random.js'
 
-// mulberry32: 0 이상 1 미만의 난수를 내는 함수를 돌려준다
-export function makeRng(seed) {
-  let a = seed >>> 0
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0
-    let t = a
-    t = Math.imul(t ^ (t >>> 15), t | 1)
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
+// 난수(makeRng)와 백분율(pct)은 RAG 화면과 함께 쓰려고 공용 파일로 옮겼다. 기존 import 경로도 그대로 쓸 수 있게 다시 내보낸다
+export { makeRng, pct }
+
+// ---------- 난수 (같은 시드면 늘 같은 결과) ----------
 
 // 표준 정규분포 난수 (Box-Muller)
 export function randn(rng) {
@@ -138,9 +132,6 @@ export function chatSequence({ user, assistant }) {
 }
 
 // ---------- 공용 수학 ----------
-
-// 확률을 백분율로 (10% 미만은 소수 첫째 자리까지)
-export const pct = (v) => `${(v * 100).toFixed(v > 0 && v < 0.1 ? 1 : 0)}%`
 
 export function softmax(logits, temperature = 1) {
   const t = Math.max(temperature, 1e-6)

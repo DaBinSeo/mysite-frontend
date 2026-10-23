@@ -133,8 +133,8 @@ export function tokenize(text) {
 
 // ---------- 임베딩 ----------
 
-// FNV-1a 32비트 해시
-function hash(str) {
+// FNV-1a 32비트 해시 (ragModel.js에서 청크 변경 감지에도 쓴다)
+export function hash(str) {
   let h = 0x811c9dc5
   for (let i = 0; i < str.length; i++) {
     h ^= str.charCodeAt(i)
@@ -150,12 +150,14 @@ function addFeature(vec, feature, weight) {
 
 // 토큰(가중치 1)과 토큰 안의 글자 bigram(0.5)을 해시해 더한 뒤 길이 1로 정규화한다.
 // bigram 덕분에 '임베딩은'과 '임베딩을'처럼 조사만 다른 단어도 비슷한 벡터가 된다.
-export function embed(tokens, dim = EMBEDDING_DIM) {
+// extra는 [특징 이름, 가중치] 목록으로, 토큰 말고 더 넣을 특징이다(ragModel.js의 개념 사전).
+export function embed(tokens, dim = EMBEDDING_DIM, extra = []) {
   const vec = new Array(dim).fill(0)
   for (const tok of tokens) {
     addFeature(vec, `w:${tok}`, 1)
     for (let i = 0; i < tok.length - 1; i++) addFeature(vec, `c:${tok.slice(i, i + 2)}`, 0.5)
   }
+  for (const [feature, weight] of extra) addFeature(vec, feature, weight)
   const norm = Math.hypot(...vec)
   return norm ? vec.map((v) => v / norm) : vec
 }

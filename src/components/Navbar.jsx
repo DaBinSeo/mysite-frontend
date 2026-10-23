@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router'
 import { useAuth } from '../auth/useAuth.js'
 import { LLM_MENU_ITEMS } from '../utils/llmSteps.js'
+import { RAG_MENU_ITEMS } from '../utils/ragSteps.js'
 
 // 드롭다운 메뉴 목록 (화면은 각각 base 경로 아래, 로그인 불필요). header 항목은 묶음 제목이다
 const MENUS = [
   { id: 'llm-menu', label: 'LLM', base: '/llm', items: LLM_MENU_ITEMS },
-  { id: 'rag-menu', label: 'RAG', base: '/rag', items: [{ to: '/rag/build', label: '데이터 구축 과정 시각화' }] },
+  { id: 'rag-menu', label: 'RAG', base: '/rag', items: RAG_MENU_ITEMS },
 ]
 
 // public/bootstrap.min.js에는 Popper가 없어 Bootstrap 드롭다운 JS가 동작하지 않으므로 열림 상태를 직접 관리한다.

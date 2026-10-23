@@ -24,6 +24,15 @@ const LlmOverview = lazyWithReload(() => import('./pages/LlmOverview.jsx'))
 const LlmPretrain = lazyWithReload(() => import('./pages/LlmPretrain.jsx'))
 const LlmServing = lazyWithReload(() => import('./pages/LlmServing.jsx'))
 const LlmSft = lazyWithReload(() => import('./pages/LlmSft.jsx'))
+const RagEval = lazyWithReload(() => import('./pages/RagEval.jsx'))
+const RagGenerate = lazyWithReload(() => import('./pages/RagGenerate.jsx'))
+const RagHybrid = lazyWithReload(() => import('./pages/RagHybrid.jsx'))
+const RagIndex = lazyWithReload(() => import('./pages/RagIndex.jsx'))
+const RagIngest = lazyWithReload(() => import('./pages/RagIngest.jsx'))
+const RagOps = lazyWithReload(() => import('./pages/RagOps.jsx'))
+const RagOverview = lazyWithReload(() => import('./pages/RagOverview.jsx'))
+const RagQuery = lazyWithReload(() => import('./pages/RagQuery.jsx'))
+const RagRerank = lazyWithReload(() => import('./pages/RagRerank.jsx'))
 const RagVisualizer = lazyWithReload(() => import('./pages/RagVisualizer.jsx'))
 
 function PageLoading() {
@@ -80,8 +89,17 @@ function App() {
             <Route path="/llm/eval" element={<LlmEval />} />
             <Route path="/llm/decoding" element={<LlmDecoding />} />
             <Route path="/llm/serving" element={<LlmServing />} />
-            <Route path="/rag" element={<Navigate to="/rag/build" replace />} />
+            <Route path="/rag" element={<Navigate to="/rag/overview" replace />} />
+            <Route path="/rag/overview" element={<RagOverview />} />
+            <Route path="/rag/ingest" element={<RagIngest />} />
             <Route path="/rag/build" element={<RagVisualizer />} />
+            <Route path="/rag/index" element={<RagIndex />} />
+            <Route path="/rag/query" element={<RagQuery />} />
+            <Route path="/rag/hybrid" element={<RagHybrid />} />
+            <Route path="/rag/rerank" element={<RagRerank />} />
+            <Route path="/rag/generate" element={<RagGenerate />} />
+            <Route path="/rag/eval" element={<RagEval />} />
+            <Route path="/rag/ops" element={<RagOps />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="*" element={<ErrorPage status={404} />} />

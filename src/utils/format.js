@@ -14,3 +14,6 @@ export function formatDate(iso) {
 export function loginPath(location) {
   return `/login?next=${encodeURIComponent(location.pathname + location.search + location.hash)}`
 }
+
+// 0~1 값을 백분율로 표시 (10% 미만은 소수 첫째 자리까지)
+export const pct = (v) => `${(v * 100).toFixed(v > 0 && v < 0.1 ? 1 : 0)}%`

@@ -10,6 +10,11 @@ const DOC_STAGES = 5
 const STAGE_DELAY_MS = 450
 const QUERY_MAX_LENGTH = 500
 
+// 움직임 줄이기 설정이면 부드러운 스크롤 대신 바로 이동한다
+function scrollBehavior() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+}
+
 // 단계별 전문용어 설명 (카드 하단에 보여 준다). settings는 위쪽 청킹 설정 카드용
 const TERMS = {
   settings: [
@@ -194,7 +199,7 @@ function InputBar({ mode, setMode, canQuery, onSubmitDoc, onSubmitQuery }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     const text = input.trim()
-    if (!text) return
+    if (!text || (mode === 'query' && !canQuery)) return
     // 모드를 바꿔도 입력은 남으므로, 문서 모드에서 쓴 긴 글이 질문으로 가지 않게 여기서도 자른다
     if (mode === 'doc') onSubmitDoc(text)
     else onSubmitQuery(text.slice(0, QUERY_MAX_LENGTH))
@@ -246,7 +251,7 @@ export default function RagVisualizer() {
   const [stage, setStage] = useState(0)
   const [mode, setMode] = useState('doc')
   const [selected, setSelected] = useState(0)
-  const bottomRef = useRef(null)
+  const retrievalRef = useRef(null)
 
   const index = useMemo(() => (doc ? buildIndex(doc, options) : null), [doc, options])
   const result = useMemo(() => (index && query ? search(index, query, topK) : null), [index, query, topK])
@@ -258,26 +263,38 @@ export default function RagVisualizer() {
   )
   const chunk = index?.chunks[Math.min(selected, index.chunks.length - 1)]
 
-  // 문서를 새로 넣으면 단계를 하나씩 연다
+  // 문서를 새로 넣으면 단계를 하나씩 연다. 5단계까지 다 나오면 질문 모드로 바꾼다
+  // (단계가 나오는 중에 질문하면 다 나온 순간 결과로 화면이 끌려가므로 그때까지 질문을 막는다)
+  const canQuery = !!index && stage >= DOC_STAGES
   useEffect(() => {
     if (!doc || stage >= DOC_STAGES) return
-    const timer = setTimeout(() => setStage((s) => s + 1), STAGE_DELAY_MS)
+    const timer = setTimeout(() => {
+      setStage(stage + 1)
+      if (stage + 1 >= DOC_STAGES) setMode('query')
+    }, STAGE_DELAY_MS)
     return () => clearTimeout(timer)
   }, [doc, stage])
 
-  // 새 단계·검색 결과가 나오면 입력창 바로 위(가장 최근 결과)로 스크롤한다
+  // 질문을 보낼 때마다(같은 질문을 다시 보내도) 6단계 시작 위치로 스크롤한다.
+  // 슬라이더로 top-k·청킹 설정을 바꿀 때는 querySeq가 그대로라 움직이지 않는다
+  const [querySeq, setQuerySeq] = useState(0)
+  const showRetrieval = !!result && stage >= DOC_STAGES
   useEffect(() => {
-    if (!stage && !result) return
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    bottomRef.current?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'end' })
-  }, [stage, result])
+    if (querySeq && showRetrieval) retrievalRef.current?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' })
+  }, [querySeq, showRetrieval])
 
+  const submitQuery = (text) => {
+    setQuery(text)
+    setQuerySeq((n) => n + 1)
+  }
+
+  // 문서를 넣으면 맨 위로 올려 1단계부터 순서대로 보게 한다 (단계가 나타나도 따라 내려가지 않는다)
   const submitDoc = (text) => {
     setDoc(text.slice(0, DOC_MAX_LENGTH))
     setQuery('')
     setSelected(0)
     setStage(1)
-    setMode('query')
+    window.scrollTo({ top: 0, behavior: scrollBehavior() })
   }
 
   const setOption = (key) => (e) => {
@@ -415,8 +432,8 @@ export default function RagVisualizer() {
           </Stage>
         )}
 
-        {result && stage >= DOC_STAGES && (
-          <>
+        {showRetrieval && (
+          <div ref={retrievalRef} className="rag-scroll-target">
             <Stage step="6" title="질문 임베딩·유사도 검색 (Retrieval)"
                    desc="질문도 같은 방식으로 토큰화·임베딩한 뒤, 모든 청크 벡터와 코사인 유사도를 계산해 높은 순으로 top-k를 고른다. 위 벡터 공간의 ★이 질문이다.">
               <div className="small mb-2">
@@ -447,13 +464,12 @@ export default function RagVisualizer() {
                    desc="고른 청크를 근거 문서로 붙여 언어 모델에 보낼 프롬프트를 만든다. 모델은 이 내용을 바탕으로 답변을 생성한다(Generation).">
               <pre className="rag-doc border rounded p-2 mb-0 bg-body-tertiary">{prompt}</pre>
             </Stage>
-          </>
+          </div>
         )}
-        <div ref={bottomRef} />
       </div>
 
-      <InputBar mode={mode} setMode={setMode} canQuery={!!index}
-                onSubmitDoc={submitDoc} onSubmitQuery={setQuery} />
+      <InputBar mode={mode} setMode={setMode} canQuery={canQuery}
+                onSubmitDoc={submitDoc} onSubmitQuery={submitQuery} />
     </div>
   )
 }

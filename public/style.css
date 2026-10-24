@@ -440,9 +440,11 @@ button.rag-vector-row {
   .home-entry:focus-visible { transform: none; }
 }
 
-/* LLM·RAG 단계 화면: 넓은 화면(lg 이상)은 왼쪽 단계 메뉴(220px) | 본문, 좁은 화면은 '현재 단계' 버튼 아래에 본문 */
+/* LLM·RAG 단계 화면: 넓은 화면(lg 이상)은 왼쪽 단계 메뉴(220px) | 본문, 좁은 화면은 '현재 단계' 버튼 아래에 본문.
+   좁은 화면도 열 너비를 minmax(0, 1fr)로 정해야 넓은 표·그림이 열을 화면 밖으로 늘리지 않고 제 영역 안에서 가로 스크롤한다 */
 .step-layout {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
 }
 @media (min-width: 992px) {

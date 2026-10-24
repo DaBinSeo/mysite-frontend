@@ -50,10 +50,11 @@ export function QueryInput({ value, onChange, presets = [], label = '질문' }) 
 }
 
 // 검색 결과 한 줄: 순위 · 청크 배지 · 본문 · 점수 막대. good이면 정답 문서 표시
+// 아주 좁은 화면(320px)에서 한 줄에 다 안 들어가면 점수 막대가 다음 줄 오른쪽으로 내려간다
 export function ResultRow({ rank, chunk, score, max = 1, digits = 3, good, muted, extra }) {
   return (
     <li className={`list-group-item px-2 py-1 small ${muted ? 'opacity-50' : ''}`}>
-      <div className="d-flex align-items-center gap-2">
+      <div className="d-flex flex-wrap align-items-center gap-2">
         <span className="text-body-secondary font-monospace rag-rank">{rank}</span>
         <ChunkBadge chunk={chunk} />
         {good && <span className="badge text-bg-success" title="평가 세트의 정답 문서">정답</span>}

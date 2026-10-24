@@ -1,8 +1,8 @@
-// RAG 구축 과정 화면들이 함께 쓰는 틀(제목·이전/다음 버튼)과 작은 부품(청크 배지·질문 입력·결과 목록·산점도)
+// RAG 구축 과정 화면들이 함께 쓰는 틀(단계 메뉴·제목·이전/다음 버튼)과 작은 부품(청크 배지·질문 입력·결과 목록·산점도)
 import { useId } from 'react'
 import { RAG_STEPS } from '../utils/ragSteps.js'
 import { docColor } from '../utils/ragModel.js'
-import { StepNav, StepPage } from './VizStage.jsx'
+import { StepLayout, StepNav, StepPage } from './VizStage.jsx'
 
 const RAG_QUERY_MAX_LENGTH = 100
 
@@ -10,7 +10,11 @@ export function RagPage({ path, intro, children }) {
   return <StepPage steps={RAG_STEPS} prefix="RAG" path={path} intro={intro}>{children}</StepPage>
 }
 
-// 자체 틀을 쓰는 화면(청킹·임베딩·벡터 저장)의 이전/다음 버튼
+// 자체 틀을 쓰는 화면(청킹·임베딩·벡터 저장)의 바깥 틀(단계 메뉴)과 이전/다음 버튼
+export function RagStepLayout({ path, children }) {
+  return <StepLayout steps={RAG_STEPS} prefix="RAG" path={path}>{children}</StepLayout>
+}
+
 export function RagStepNav({ path }) {
   return <StepNav steps={RAG_STEPS} prefix="RAG" path={path} />
 }

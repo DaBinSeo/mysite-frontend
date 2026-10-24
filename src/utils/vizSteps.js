@@ -5,7 +5,7 @@ export function stepTitle(step) {
   return step.num ? `${step.num}. ${step.label}` : step.label
 }
 
-// 드롭다운 항목: 묶음(group)이 바뀌는 곳마다 제목을 끼운다
+// 단계 메뉴 항목: 묶음(group)이 바뀌는 곳마다 제목을 끼운다
 export function stepMenuItems(steps) {
   return steps.flatMap((step, i) => [
     ...(i === 0 || steps[i - 1].group !== step.group ? [{ header: step.group }] : []),

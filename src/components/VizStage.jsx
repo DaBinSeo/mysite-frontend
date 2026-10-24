@@ -1,7 +1,7 @@
 // 시각화 화면(RAG·LLM)에서 함께 쓰는 단계 카드·용어 설명·단계 화면 틀
-import { Link } from 'react-router'
+import { Link, NavLink } from 'react-router'
 import { useTitle } from '../utils/useTitle.js'
-import { stepGroups, stepTitle } from '../utils/vizSteps.js'
+import { stepGroups, stepMenuItems, stepTitle } from '../utils/vizSteps.js'
 
 // 카드 하단 용어 설명
 export function Terms({ items }) {
@@ -38,19 +38,73 @@ export function StageCard({ step, title, desc, terms, children }) {
   )
 }
 
+// 단계 메뉴 목록 (묶음 제목 + 단계 링크). 지금 화면의 링크는 NavLink가 active·aria-current로 표시한다
+function StepMenuList({ steps }) {
+  return (
+    <ul className="list-unstyled mb-0 step-menu">
+      {stepMenuItems(steps).map((item) => (item.header ? (
+        <li key={`header-${item.header}`} className="step-menu-header">{item.header}</li>
+      ) : (
+        <li key={item.to}>
+          <NavLink className="step-menu-link" to={item.to} end>{item.label}</NavLink>
+        </li>
+      )))}
+    </ul>
+  )
+}
+
+// 단계 메뉴: 넓은 화면(lg 이상)은 왼쪽에 붙여 두고, 좁은 화면은 '현재 단계' 버튼을 눌러 펼친다.
+// 단계마다 라우트가 달라 다른 단계로 가면 새로 그려져 저절로 닫히고, 지금 단계 링크를 눌렀을 때는 직접 닫는다
+function StepSidebar({ steps, prefix, path }) {
+  const step = steps.find((s) => s.path === path)
+  return (
+    <>
+      <nav className="step-sidebar d-none d-lg-block" aria-label={`${prefix} 단계`}>
+        <div className="step-sidebar-title">{prefix} 단계</div>
+        <StepMenuList steps={steps} />
+      </nav>
+      <details className="step-picker d-lg-none"
+               onClick={(e) => { if (e.target.closest('a')) e.currentTarget.open = false }}>
+        <summary>
+          <span className="text-body-secondary">현재 단계</span> {stepTitle(step)}
+        </summary>
+        <nav className="border rounded bg-body mt-1 p-2" aria-label={`${prefix} 단계`}>
+          <StepMenuList steps={steps} />
+        </nav>
+      </details>
+    </>
+  )
+}
+
+// 단계별 화면 바깥 틀: 왼쪽 단계 메뉴 | 위치(메뉴 / 묶음) + 본문. 자체 제목을 쓰는 화면도 이 틀로 감싼다
+export function StepLayout({ steps, prefix, path, children }) {
+  const step = steps.find((s) => s.path === path)
+  return (
+    <div className="container-xxl my-3 pb-5">
+      <div className="step-layout">
+        <StepSidebar steps={steps} prefix={prefix} path={path} />
+        <div className="step-main">
+          {step && <div className="small text-body-secondary mb-1">{prefix} / {step.group}</div>}
+          {children}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // 단계별 화면 공통 틀: 단계 제목·소개 → 내용 → 이전/다음 단계 버튼. steps는 메뉴의 단계 목록, prefix는 문서 제목 앞말
 export function StepPage({ steps, prefix, path, intro, children }) {
   const step = steps.find((s) => s.path === path)
   useTitle(`${prefix} ${stepTitle(step)}`)
   return (
-    <div className="container my-3 pb-5">
+    <StepLayout steps={steps} prefix={prefix} path={path}>
       <h4 className="border-bottom pb-2">{stepTitle(step)}</h4>
-      <p className="text-body-secondary small">
+      <p className="text-body-secondary small step-intro">
         {intro} 모든 계산은 브라우저에서 하는 학습용 축소판입니다.
       </p>
       {children}
       <StepNav steps={steps} prefix={prefix} path={path} />
-    </div>
+    </StepLayout>
   )
 }
 

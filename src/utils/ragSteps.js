@@ -1,6 +1,4 @@
-import { stepMenuItems } from './vizSteps.js'
-
-// RAG 메뉴의 화면 목록. 네비게이션 드롭다운·전체 흐름 화면·이전/다음 버튼이 이 순서를 함께 쓴다
+// RAG 메뉴의 화면 목록. 단계 메뉴·전체 흐름 화면·이전/다음 버튼이 이 순서를 함께 쓴다
 export const RAG_STEPS = [
   {
     path: '/rag/overview', group: '시작', label: '전체 흐름 한눈에 보기',
@@ -52,5 +50,3 @@ export const RAG_STEPS = [
     input: '문서 변경·실제 트래픽', output: '최신·안전·빠른 서비스',
   },
 ]
-
-export const RAG_MENU_ITEMS = stepMenuItems(RAG_STEPS)

@@ -1,5 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react'
-import { LlmStepNav } from '../components/LlmViz.jsx'
+import { LlmStepLayout, LlmStepNav } from '../components/LlmViz.jsx'
 import { StageCard, Terms } from '../components/VizStage.jsx'
 import {
   BPE_MAX_MERGES, CORPUS_MAX_LENGTH, DEFAULT_OPTIONS, MAX_DOCS, PII_LABELS, PREFERENCE_SAMPLE,
@@ -200,9 +200,9 @@ export default function LlmDataVisualizer() {
   const trainCount = chat.filter((t) => t.train).length
 
   return (
-    <div className="container my-3 pb-5">
+    <LlmStepLayout path="/llm/data">
       <h4 className="border-bottom pb-2">LLM 학습 데이터 구축 과정 시각화</h4>
-      <p className="text-body-secondary small">
+      <p className="text-body-secondary small step-intro">
         수집한 문서가 정제·필터링 → 중복 제거 → 개인정보 마스킹 → 토큰화 → 시퀀스 패킹을 거쳐 사전학습 데이터가 되고,
         대화 형식의 지시·선호 데이터로 미세 조정 데이터가 만들어지는 과정을 보여 줍니다.
         모든 계산은 브라우저에서 하는 학습용 축소판이며, 입력한 글은 서버로 보내지 않습니다.
@@ -531,6 +531,6 @@ export default function LlmDataVisualizer() {
         </Stage>
       )}
       <LlmStepNav path="/llm/data" />
-    </div>
+    </LlmStepLayout>
   )
 }

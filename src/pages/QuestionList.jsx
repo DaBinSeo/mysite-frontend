@@ -49,19 +49,17 @@ export default function QuestionList() {
 
   return (
     <div className="container my-3">
-      {/* 등록 버튼은 오른쪽. 모바일에서는 버튼을 위에 쌓고, md 이상에서는 검색창 왼쪽·버튼 오른쪽 */}
-      <div className="row g-2 my-3">
-        <div className="col-12 col-md-6 order-md-2 text-end">
-          <Link to="/questions/new" className="btn btn-primary">질문 등록하기</Link>
-        </div>
-        <div className="col-12 col-md-6 order-md-1">
-          <form onSubmit={handleSearch} key={kw}>
-            <div className="input-group">
-              <input type="text" name="kw" className="form-control" defaultValue={kw} aria-label="검색어" />
-              <button className="btn btn-outline-secondary" type="submit">찾기</button>
-            </div>
-          </form>
-        </div>
+      <h4 className="border-bottom pb-2">질문과 답변</h4>
+      <p className="text-body-secondary small">공부하다 궁금한 점을 질문하고 답변을 나눕니다. 제목·내용·답변·글쓴이로 검색할 수 있습니다.</p>
+      {/* 검색창과 등록 버튼을 한 줄에 둔다(검색창이 남은 폭을 채움). 아주 좁은 화면에서는 버튼이 다음 줄로 내려간다 */}
+      <div className="d-flex flex-wrap gap-2 mb-3">
+        <form className="flex-grow-1 question-search" onSubmit={handleSearch} key={kw} role="search">
+          <div className="input-group">
+            <input type="text" name="kw" className="form-control" defaultValue={kw} aria-label="검색어" placeholder="검색어" />
+            <button className="btn btn-outline-secondary" type="submit">찾기</button>
+          </div>
+        </form>
+        <Link to="/questions/new" className="btn btn-primary ms-auto">질문 등록하기</Link>
       </div>
       {/* 좁은 화면(md 미만)에서는 제목 열만 남기고 글쓴이·작성일시는 제목 아래에 작게 표시한다 */}
       <table className="table">

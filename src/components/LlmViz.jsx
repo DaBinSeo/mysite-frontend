@@ -1,7 +1,7 @@
-// LLM 구축 과정 화면들이 함께 쓰는 틀(제목·이전/다음 버튼)과 단어 칩. 그래프는 VizCharts.jsx(RAG 화면과 공용)
+// LLM 구축 과정 화면들이 함께 쓰는 틀(단계 메뉴·제목·이전/다음 버튼)과 단어 칩. 그래프는 VizCharts.jsx(RAG 화면과 공용)
 import { SPECIALS, VOCAB } from '../utils/llmModel.js'
 import { LLM_STEPS } from '../utils/llmSteps.js'
-import { StepNav, StepPage } from './VizStage.jsx'
+import { StepLayout, StepNav, StepPage } from './VizStage.jsx'
 
 export { Bars, Heatmap, LineChart } from './VizCharts.jsx'
 
@@ -10,7 +10,11 @@ export function LlmPage({ path, intro, children }) {
   return <StepPage steps={LLM_STEPS} prefix="LLM" path={path} intro={intro}>{children}</StepPage>
 }
 
-// 자체 틀을 쓰는 화면(학습 데이터 구축 과정)의 이전/다음 버튼
+// 자체 틀을 쓰는 화면(학습 데이터 구축 과정)의 바깥 틀(단계 메뉴)과 이전/다음 버튼
+export function LlmStepLayout({ path, children }) {
+  return <StepLayout steps={LLM_STEPS} prefix="LLM" path={path}>{children}</StepLayout>
+}
+
 export function LlmStepNav({ path }) {
   return <StepNav steps={LLM_STEPS} prefix="LLM" path={path} />
 }

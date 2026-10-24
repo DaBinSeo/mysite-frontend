@@ -1,6 +1,4 @@
-import { stepMenuItems } from './vizSteps.js'
-
-// LLM 메뉴의 화면 목록. 네비게이션 드롭다운·전체 흐름 화면·이전/다음 버튼이 이 순서를 함께 쓴다
+// LLM 메뉴의 화면 목록. 단계 메뉴·전체 흐름 화면·이전/다음 버튼이 이 순서를 함께 쓴다
 export const LLM_STEPS = [
   {
     path: '/llm/overview', group: '시작', label: '전체 흐름 한눈에 보기',
@@ -52,5 +50,3 @@ export const LLM_STEPS = [
     input: '학습된 가중치', output: '서비스 중인 API',
   },
 ]
-
-export const LLM_MENU_ITEMS = stepMenuItems(LLM_STEPS)

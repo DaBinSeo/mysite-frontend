@@ -1,5 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
-import { RagStepNav } from '../components/RagViz.jsx'
+import { RagStepLayout, RagStepNav } from '../components/RagViz.jsx'
 import { StageCard, Terms } from '../components/VizStage.jsx'
 import {
   CHUNK_STRATEGIES, DOC_MAX_LENGTH, EMBEDDING_DIM, SAMPLE_DOC,
@@ -287,9 +287,9 @@ export default function RagVisualizer() {
 
   return (
     <div className="rag-page">
-      <div className="container my-3">
+      <RagStepLayout path="/rag/build">
         <h4 className="border-bottom pb-2">{stepTitle(STEP)}</h4>
-        <p className="text-body-secondary small">
+        <p className="text-body-secondary small step-intro">
           하단 입력창에 문서를 넣으면 청킹 → 토큰화 → 임베딩 → 벡터 공간 순서로 처리 과정을 보여 줍니다.
           그다음 질문을 입력하면 비슷한 청크를 찾아 프롬프트를 만드는 검색 단계까지 볼 수 있습니다.
           임베딩은 실제 모델 대신 단어·글자 조각을 해시한 {EMBEDDING_DIM}차원 벡터(학습용)이며, 입력한 글은 서버로 보내지 않습니다.
@@ -443,7 +443,7 @@ export default function RagVisualizer() {
         )}
 
         <RagStepNav path="/rag/build" />
-      </div>
+      </RagStepLayout>
 
       <InputBar mode={mode} setMode={setMode} canQuery={canQuery}
                 onSubmitDoc={submitDoc} onSubmitQuery={submitQuery} />

@@ -7,7 +7,7 @@ import { useAuth } from '../auth/useAuth.js'
 const MENUS = [
   { to: '/llm', label: 'LLM' },
   { to: '/rag', label: 'RAG' },
-  { to: '/questions', label: 'Q&A' },
+  { to: '/questions', label: '게시판' },
 ]
 
 // 네비게이션바 (navbar.html)

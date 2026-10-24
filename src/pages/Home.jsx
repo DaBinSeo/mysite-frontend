@@ -20,7 +20,7 @@ const ENTRIES = [
     action: '전체 흐름 보기',
   },
   {
-    to: '/questions', badge: '게시판', title: 'Q&A',
+    to: '/questions', badge: '질문·답변', title: '게시판',
     desc: '공부하다 생긴 궁금한 점을 질문하고, 다른 사람의 답변을 보며 함께 정리합니다.',
     action: '질문 보러 가기',
   },
@@ -36,7 +36,7 @@ export default function Home() {
           <h1 className="h3 fw-bold mb-3">LLM과 RAG를 직접 계산하며 배우기</h1>
           <p className="text-body-secondary mb-0">
             언어 모델이 만들어지고 검색과 함께 답을 내기까지의 과정을 작은 예제로 하나씩 돌려 봅니다.
-            모든 계산은 브라우저에서 하며, 막히는 부분은 Q&amp;A에 물어볼 수 있습니다.
+            모든 계산은 브라우저에서 하며, 막히는 부분은 게시판에 물어볼 수 있습니다.
           </p>
         </div>
         <div className="col-12 col-lg-7">

@@ -1,98 +1,131 @@
 import { useEffect, useRef } from 'react'
 
-// 도트 그래픽 해변. 작은 캔버스(W×H)에 픽셀을 직접 찍고 CSS로 확대해(pixelated) 도트 느낌을 낸다.
-// 앞쪽부터 야자수 잎·풀·고양이·바위, 뒤쪽은 파도·등대 섬·구름·해 (Codex 화면 시안의 해변 그림을 따름)
-const W = 192
-const H = 108
-const HORIZON = 40 // 하늘과 바다의 경계
-const SHORE = 70 // 파도가 가장 물러났을 때의 물가
-const REACH = 12 // 파도가 모래사장으로 밀려 올라오는 거리
+// 도트 그래픽 해변 (Codex 화면 시안의 그림을 따름). 작은 캔버스(W×H)에 픽셀을 직접 찍고 CSS로 확대해(pixelated) 도트 느낌을 낸다.
+// 하늘·바다·모래를 한 번에 칠한 뒤 해·구름 → 양쪽 섬과 등대 → 바위·풀·고양이·야자수 잎 순서로 덧그린다
+const W = 224
+const H = 140
+const HORIZON = 63 // 하늘과 바다의 경계
+const SHORE = 101 // 파도가 가장 물러났을 때의 물가
+const REACH = 6 // 파도가 모래사장으로 밀려 올라오는 거리
 const FPS = 12 // 낮은 프레임이 도트 애니메이션처럼 보인다
-const SUN = { x: 136, y: 16, r: 7 }
-const ISLAND = { from: 146, top: 7 } // 수평선 오른쪽 섬: 시작 x, 가장 높은 곳의 높이
-const LIGHTHOUSE_X = 166
-const CAT = { x: 80, y: 82 } // 고양이 그림의 왼쪽 위
+const SUN = { x: 174, y: 17, r: 7 }
+const LIGHTHOUSE_X = 175
+const CAT = { x: 56, y: 98 } // 고양이 그림의 왼쪽 위
 
 // 4×4 Bayer 행렬. 색 띠 경계를 격자무늬로 섞는다(디더링).
 const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16)
 
 // ImageData를 Uint32Array로 쓰므로 리틀 엔디언 ABGR 순서로 묶는다.
-const rgb = (hex) => {
-  const n = parseInt(hex.slice(1), 16)
-  return (0xff << 24) | ((n & 0xff) << 16) | (n & 0xff00) | (n >> 16)
+const parse = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
+const pack = ([r, g, b]) => (0xff << 24) | (b << 16) | (g << 8) | r
+const rgb = (hex) => pack(parse(hex))
+
+// 색 사이를 n단계로 나눈 팔레트. 단계가 촘촘해 디더링한 띠가 부드럽게 이어진다
+function gradient(stops, n) {
+  const colors = stops.map(parse)
+  return Array.from({ length: n }, (_, i) => {
+    const t = (i / (n - 1)) * (colors.length - 1)
+    const k = Math.min(colors.length - 2, Math.floor(t))
+    const f = t - k
+    return pack(colors[k].map((v, j) => Math.round(v + (colors[k + 1][j] - v) * f)))
+  })
 }
 
-const SKY = ['#3a84e2', '#5c9ff0', '#8cc2f6', '#c4e2fb'].map(rgb)
-const SEA = ['#145aa8', '#1d76c6', '#2696da', '#35b8e2', '#6ad6e6'].map(rgb)
-const SEA_LIGHT = rgb('#a8e6ef')
-const FOAM = rgb('#f4fbff')
-const SPARKLE = rgb('#fff6c8')
-const SAND = rgb('#e9cf94')
-const SAND_DARK = rgb('#d4b577')
-const SAND_LIGHT = rgb('#f6e3b4')
-const WET_SAND = rgb('#c9a96c')
-const WET_SAND_DARK = rgb('#b8975c')
-const SUN_COLOR = rgb('#fff3b0')
-const SUN_GLOW = rgb('#fbe7a1')
+const SKY = gradient(['#4c9be9', '#74b4f1', '#a6d0f6', '#d8ecfb'], 12)
+const SEA = gradient(['#1257bd', '#1c77d6', '#2995e3', '#3ab2e9', '#66cde8'], 12)
+const SEA_LIGHT = rgb('#bfe9f8')
+const WHITE = rgb('#ffffff')
+const FOAM = rgb('#f6fcff')
+const GLINT = rgb('#fff7cf')
+const GLINT_SOFT = rgb('#ffe9a3')
+const SAND = rgb('#f5e4c1')
+const SAND_DARK = rgb('#e3cb9c')
+const SAND_LIGHT = rgb('#fff4de')
+const WET_SAND = rgb('#e8d1a2')
+const WET_GLINT = rgb('#fbefcf')
+const SHADOW = rgb('#dcc596')
+const SUN_CORE = rgb('#fff6b8')
+const SUN_RIM = rgb('#fde68a')
+const SUN_GLOW = rgb('#f3f1cf')
+const SUN_HALO = rgb('#b9dcf8')
 const CLOUD = rgb('#ffffff')
-const CLOUD_SHADE = rgb('#dbe8f7')
-const SHELL = rgb('#f2a7a0')
-const ISLAND_LIGHT = rgb('#7cc35e')
-const ISLAND_GREEN = rgb('#469447')
-const ISLAND_DARK = rgb('#2f6e3b')
-const LIGHTHOUSE = rgb('#f7f7f2')
-const LIGHTHOUSE_RED = rgb('#d9483b')
-const LAMP = rgb('#ffe066')
-const PALM_DARK = rgb('#22603a')
-const PALM = rgb('#2f8a45')
-const PALM_LIGHT = rgb('#5fb85a')
-const GRASS_DARK = rgb('#3b7d36')
-const GRASS = rgb('#5ea845')
-const GRASS_LIGHT = rgb('#8dcc5f')
-const ROCK_DARK = rgb('#454b55')
-const ROCK = rgb('#646b76')
-const ROCK_LIGHT = rgb('#8a929d')
-// 고양이(뒷모습): K 테두리, O 주황, D 줄무늬, L 밝은 털, . 투명
-const CAT_COLORS = { K: rgb('#6b3a16'), O: rgb('#f39331'), D: rgb('#c9661c'), L: rgb('#ffc074') }
+const CLOUD_SHADE = rgb('#dfeafa')
+const ISLAND_LIGHT = rgb('#86c06c')
+const ISLAND_GREEN = rgb('#4f9655')
+const ISLAND_DARK = rgb('#3d7f48')
+const CLIFF = rgb('#e6cb9e')
+const CLIFF_DARK = rgb('#c8a878')
+const LIGHTHOUSE = rgb('#f7f5ef')
+const LIGHTHOUSE_SHADE = rgb('#d6d2c8')
+const LIGHTHOUSE_RED = rgb('#d8473a')
+const ROCK_DARK = rgb('#454b54')
+const ROCK = rgb('#646a73')
+const ROCK_LIGHT = rgb('#8b9199')
+const PALM_DARK = rgb('#2a6634')
+const PALM = rgb('#3d8a3f')
+const PALM_LIGHT = rgb('#78b552')
+const LEAF_DARK = rgb('#3b7d3d')
+const LEAF = rgb('#5aa64e')
+const LEAF_LIGHT = rgb('#88c866')
+
+// 고양이(뒷모습, 주황 등·흰 옆구리): K 테두리, O 주황, D 진한 주황(그늘), W 흰 털, S 흰 털 그늘, . 투명
+const CAT_COLORS = {
+  K: rgb('#8e5126'), O: rgb('#f2a14a'), D: rgb('#d8802d'), W: rgb('#ffffff'), S: rgb('#e6e0d6'),
+}
 const CAT_SPRITE = [
-  '..K.......K.....',
-  '.KOK.....KOK....',
-  '.KOOK...KOOK....',
-  '.KOOOKKKOOOK....',
-  'KOOOOOOOOOOOK...',
-  'KODOOOOOOODOK...',
-  'KOODOOOOODOOK...',
-  'KOOOOOOOOOOOK...',
-  '.KOOOOOOOOOK....',
-  '..KOOOOOOOK.....',
-  '.KOOOOOOOOOK....',
-  'KOODOOOOODOOK...',
-  'KOOODOOODOOOK.K.',
-  'KOOOOOOOOOOOKKOK',
-  'KOODOOOOODOOKKOK',
-  'KOOOOOOOOOOOOOK.',
-  'KLOOOOOOOOOOLK..',
-  '.KKKKKKKKKKKK...',
+  '........K.........K',
+  '.......KOK.......KOK',
+  '.......KOOK.....KOOK',
+  '.......KOOOKKKKKOOOK',
+  '......KOOOOOOOOOOOOOK',
+  '......KOOOOOOOOOOOODK',
+  '......KOOOOOOOOOOOODK',
+  '......KOOOOOOOOOOOODK',
+  '.......KOOOOOOOOOODK',
+  '........KOOOOOOOODK',
+  '.......KOOOOOOOOOODK',
+  '......KOOOOOOOOOOOODK',
+  '......KWOOOOOOOOOODDK',
+  '.....KWWOOOOOOOOOODDWK',
+  '.....KWWOOOOOOOOOODDWK',
+  '.....KWWWOOOOOOOODDWWK',
+  '.....KWWWOOOOOOOODDWWK',
+  '.....KWWWWOOOOOODDWWWK',
+  '.....KWWWWOOOOOODDWWSK',
+  '.....KWWWWWOOOODDWWWSK',
+  '.....KSWWWWOOOODWWWSSK',
+  '.KK..KSSWWWWOODWWWSSK',
+  'KOOKKKKSSWWWWWWWSSKK',
+  'KOOOOOOKKKKKKKKKKKK',
+  '.KKKKKK',
 ]
+
+// 뭉게구름: 기준점(아래 가운데)과 동그라미 [dx, dy, 반지름] 목록. 바닥은 기준점 높이에서 평평하게 자른다
+const CLOUDS = [
+  { x: 72, y: 28, speed: 0.5, puffs: [[-6, 0, 3], [-1, -2, 4], [5, -1, 3], [8, 0, 2]] },
+  { x: 62, y: 53, speed: 0.3, puffs: [[-24, 0, 4], [-17, -3, 6], [-8, -8, 8], [2, -6, 7], [11, -4, 6], [20, -1, 4], [27, 0, 3]] },
+  { x: 98, y: 41, speed: 0.4, puffs: [[-8, 0, 3], [-3, -4, 5], [3, -6, 5], [8, -1, 3]] },
+  { x: 135, y: 49, speed: 0.35, puffs: [[-8, 0, 3], [-3, -2, 4], [3, -2, 4], [8, 0, 3]] },
+  { x: 158, y: 45, speed: 0.35, puffs: [[-6, 0, 3], [-1, -2, 4], [5, 0, 3]] },
+  { x: 206, y: 40, speed: 0.25, puffs: [[-20, 0, 3], [-13, -3, 5], [-5, -8, 7], [5, -12, 8], [14, -9, 7], [22, -4, 6]] },
+  { x: 202, y: 20, speed: 0.45, puffs: [[-3, 0, 2], [1, -1, 3], [4, 0, 2]] },
+  { x: 29, y: 45, speed: 0.4, puffs: [[-3, 0, 2], [0, -1, 3], [3, 0, 2]] },
+  { x: 107, y: 60, speed: 0.2, puffs: [[-3, 0, 2], [1, -1, 2], [4, 0, 2]] },
+  { x: 142, y: 60, speed: 0.2, puffs: [[-7, 0, 2], [-2, -2, 3], [3, -1, 3], [7, 0, 2]] },
+]
+
 // 야자수 잎: 왼쪽 위 바깥에서 뻗는 각도(라디안, 0은 오른쪽·양수는 아래), 길이, 처지는 정도
 const FRONDS = [
-  { angle: -0.2, length: 34, droop: 10 },
-  { angle: 0.15, length: 48, droop: 18 },
-  { angle: 0.45, length: 44, droop: 16 },
-  { angle: 0.8, length: 38, droop: 10 },
-  { angle: 1.15, length: 30, droop: 6 },
-  { angle: 1.45, length: 22, droop: 3 },
+  { angle: 2.3, length: 20, droop: 10 },
+  { angle: 2.0, length: 26, droop: 8 },
+  { angle: 1.5, length: 34, droop: 8 },
+  { angle: 1.75, length: 30, droop: 6 },
+  { angle: 1.25, length: 38, droop: 10 },
+  { angle: 0.75, length: 44, droop: 18 },
+  { angle: 0.55, length: 46, droop: 20 },
+  { angle: 0.35, length: 48, droop: 22 },
+  { angle: 0.05, length: 40, droop: 20 },
 ]
-const GRASS_TUFTS = [[5, 107], [12, 105], [19, 108], [27, 107], [36, 108], [184, 108]]
-
-const CLOUDS = [
-  { x: 20, y: 10, w: 14, h: 4, speed: 1.2 },
-  { x: 95, y: 22, w: 10, h: 3, speed: 0.8 },
-  { x: 160, y: 27, w: 8, h: 2, speed: 0.5 },
-  { x: 60, y: 15, w: 8, h: 3, speed: 1.0 },
-  { x: 125, y: 8, w: 6, h: 2, speed: 0.6 },
-]
-const SHELLS = [[30, 84], [88, 80], [131, 79], [152, 78]] // 파도가 가장 멀리 올 때 잠기는 위치
 
 // 좌표마다 고정된 0~1 난수 (모래 알갱이·거품·반짝임용)
 function hash(x, y, seed) {
@@ -101,97 +134,156 @@ function hash(x, y, seed) {
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296
 }
 
+const dither = (x, y) => BAYER[(y & 3) * 4 + (x & 3)]
+
 // 색 목록에서 t(0~1) 위치의 색을 디더링으로 고른다.
 const pick = (colors, t, x, y) => {
-  const i = Math.floor(t * (colors.length - 1) + BAYER[(y & 3) * 4 + (x & 3)])
+  const i = Math.floor(t * (colors.length - 1) + dither(x, y))
   return colors[Math.min(colors.length - 1, Math.max(0, i))]
 }
 
+// 캔버스 밖 좌표는 건너뛰고 한 점을 찍는다
 const set = (px, x, y, c) => {
   const ix = Math.round(x)
   const iy = Math.round(y)
   if (ix >= 0 && ix < W && iy >= 0 && iy < H) px[iy * W + ix] = c
 }
 
-// 섬 윤곽: 가운데가 볼록한 언덕 두 개
-const islandHeight = (x) => {
-  if (x < ISLAND.from) return 0
-  const a = Math.max(0, 1 - ((x - 170) / 20) ** 2)
-  const b = Math.max(0, 1 - ((x - 186) / 12) ** 2)
-  return Math.round(ISLAND.top * Math.max(a, b * 0.8) + (x - ISLAND.from < 4 ? 1 : 0))
+// 물가 모양(굴곡)은 고정, 파도는 시간에 따라 밀려왔다 빠진다. 밀려올 땐 빠르고 빠질 땐 느리다.
+const shoreBase = (x) => SHORE + 2 * Math.sin(x * 0.05) + 1.5 * Math.sin(x * 0.021 + 1)
+const surge = (x, t) => {
+  const s = Math.sin(t * 0.7 - x * 0.015)
+  return s > 0 ? Math.sqrt(s) : s * 0.4
 }
 
-// 수평선 위의 섬과 등대 (등대 불빛은 1초 켜지고 1초 꺼진다)
-function drawIsland(px, t) {
-  for (let x = ISLAND.from; x < W; x++) {
-    const h = islandHeight(x)
-    for (let i = 1; i <= h; i++) {
-      const y = HORIZON - i
-      set(px, x, y, i === h ? ISLAND_LIGHT : i <= 1 ? ISLAND_DARK : hash(x, y, 3) > 0.8 ? ISLAND_DARK : ISLAND_GREEN)
+// 해: 밝은 원 → 노란 테두리 → 연한 빛무리 두 겹 (빛무리는 하늘보다 조금씩 밝다)
+function drawSun(px) {
+  const R = SUN.r + 6
+  for (let y = SUN.y - R; y <= SUN.y + R; y++) {
+    for (let x = SUN.x - R; x <= SUN.x + R; x++) {
+      const d = Math.hypot(x - SUN.x, y - SUN.y)
+      if (d <= SUN.r - 1) set(px, x, y, SUN_CORE)
+      else if (d <= SUN.r) set(px, x, y, SUN_RIM)
+      else if (d <= SUN.r + 2.5) set(px, x, y, SUN_GLOW)
+      else if (d <= R) set(px, x, y, SUN_HALO)
     }
   }
-  const base = HORIZON - islandHeight(LIGHTHOUSE_X)
-  for (let i = 1; i <= 8; i++) {
-    const c = i === 3 || i === 6 ? LIGHTHOUSE_RED : LIGHTHOUSE
-    set(px, LIGHTHOUSE_X, base - i, c)
-    set(px, LIGHTHOUSE_X + 1, base - i, c)
-  }
-  set(px, LIGHTHOUSE_X, base - 9, LIGHTHOUSE_RED)
-  set(px, LIGHTHOUSE_X + 1, base - 9, LIGHTHOUSE_RED)
-  if (Math.floor(t) % 2 === 0) {
-    set(px, LIGHTHOUSE_X - 1, base - 8, LAMP)
-    set(px, LIGHTHOUSE_X + 2, base - 8, LAMP)
+}
+
+// 구름은 천천히 흘러가고 화면 밖으로 나가면 반대편에서 다시 나온다. 아래 두 줄과 오른쪽 아래는 그늘
+function drawCloud(px, { x, y, speed, puffs }, t) {
+  const span = W + 80
+  const cx = ((((x + t * speed + 40) % span) + span) % span) - 40
+  for (const [dx, dy, r] of puffs) {
+    for (let py = Math.floor(y + dy - r); py <= y; py++) {
+      for (let qx = Math.floor(cx + dx - r); qx <= cx + dx + r; qx++) {
+        const ox = qx - cx - dx
+        const oy = py - y - dy
+        if (ox * ox + oy * oy > r * r || py >= HORIZON) continue
+        const shade = py >= y - 1 || (ox > r * 0.45 && oy > r * 0.2)
+        set(px, qx, py, shade ? CLOUD_SHADE : CLOUD)
+      }
+    }
   }
 }
 
-// 바위: 아래가 평평한 반타원, 왼쪽 위가 밝다
-function drawRock(px, cx, cy, w, h) {
+// 섬 하나: 윤곽 함수 height(x)만큼 수평선 위로 쌓는다. 맨 아래 두 줄 일부는 모래색 절벽
+function drawIsland(px, from, to, height) {
+  for (let x = from; x < to; x++) {
+    const h = Math.round(height(x))
+    for (let i = 1; i <= h; i++) {
+      const y = HORIZON - i
+      let c = i === h ? ISLAND_LIGHT : hash(x, y, 3) > 0.75 ? ISLAND_DARK : ISLAND_GREEN
+      if (i <= 2 && hash(x >> 2, i, 4) > 0.4) c = i === 1 ? CLIFF_DARK : CLIFF
+      set(px, x, y, c)
+    }
+  }
+}
+
+const leftIsland = (x) => Math.max(0, 7 * (1 - ((x - 16) / 34) ** 2)) + (x > 44 && x < 60 ? 2 : 0) + hash(x >> 1, 0, 6) * 1.2
+const rightIsland = (x) => Math.min(14, (x - 149) * 0.45) + Math.sin(x * 0.8) * 0.8 + hash(x >> 1, 0, 7) * 1.5
+
+// 오른쪽 섬 위 등대: 흰 기둥(오른쪽은 그늘)과 빨간 지붕
+function drawLighthouse(px) {
+  const base = HORIZON - Math.round(rightIsland(LIGHTHOUSE_X)) + 1
+  for (let i = 0; i < 11; i++) {
+    for (let k = 0; k < 3; k++) {
+      const c = i >= 8 ? LIGHTHOUSE_RED : k === 2 ? LIGHTHOUSE_SHADE : LIGHTHOUSE
+      set(px, LIGHTHOUSE_X + k, base - i, c)
+    }
+  }
+  set(px, LIGHTHOUSE_X + 1, base - 11, LIGHTHOUSE_RED)
+}
+
+// 바위: 아래가 평평한 반타원, 왼쪽 위가 밝다. 물에 잠긴 바위는 밑동에 거품이 인다
+function drawRock(px, cx, cy, w, h, frame, wet) {
   for (let y = cy - h; y <= cy; y++) {
     for (let x = cx - w; x <= cx + w; x++) {
       const dx = (x - cx) / w
       const dy = (y - cy) / h
-      if (dx * dx + dy * dy > 1) continue
+      const d = dx * dx + dy * dy
+      if (d > 1) continue
       const light = -dx * 0.6 - (dy + 0.5) * 0.9 + (hash(x, y, 5) - 0.5) * 0.4
-      set(px, x, y, y === cy ? ROCK_DARK : light > 0.45 ? ROCK_LIGHT : light > -0.2 ? ROCK : ROCK_DARK)
+      set(px, x, y, d > 0.82 || y === cy ? ROCK_DARK : light > 0.45 ? ROCK_LIGHT : light > -0.2 ? ROCK : ROCK_DARK)
+    }
+  }
+  if (!wet) return
+  for (let x = cx - w - 1; x <= cx + w + 1; x++) {
+    if (hash(x, cy, frame) > 0.35) set(px, x, cy + 1, FOAM)
+  }
+}
+
+// 작은 풀: 줄기를 따라 좌우로 번갈아 잎이 난다
+function drawSprout(px, x, base, height, sway) {
+  for (let i = 0; i < height; i++) {
+    const sx = x + sway * (i / height)
+    set(px, sx, base - i, LEAF_DARK)
+    if (i < 2 || i % 3 !== 0) continue
+    const side = (i / 3) % 2 === 0 ? 1 : -1
+    const len = 4 - Math.floor((i / height) * 2)
+    for (let k = 1; k <= len; k++) {
+      set(px, sx + side * k, base - i - Math.floor(k / 2), k === len ? LEAF_LIGHT : LEAF)
+      set(px, sx + side * k, base - i - Math.floor(k / 2) + 1, LEAF_DARK)
     }
   }
 }
 
-// 풀 한 포기: 잎 다섯 장이 바람에 조금씩 흔들린다
-function drawTuft(px, bx, by, sway) {
-  for (let k = -2; k <= 2; k++) {
-    const height = 4 + Math.floor(hash(bx, k, 9) * 6)
-    const lean = k * 0.5 + sway
-    for (let i = 0; i < height; i++) {
-      const c = i === height - 1 ? GRASS_LIGHT : i < height / 2 ? GRASS_DARK : GRASS
-      set(px, bx + k + lean * (i / height) * 2, by - i, c)
+// 왼쪽 아래 큰 잎: 아래에서 위로 뻗는 두꺼운 잎사귀, 끝으로 갈수록 가늘어진다
+function drawBlade(px, x0, y0, angle, length, sway) {
+  const dx = Math.cos(angle + sway)
+  const dy = Math.sin(angle + sway)
+  for (let s = 0; s <= length; s += 0.5) {
+    const k = s / length
+    const half = 2.5 * Math.sin(Math.PI * Math.min(1, k * 1.2 + 0.1))
+    for (let w = -half; w <= half; w += 0.5) {
+      set(px, x0 + dx * s - dy * w, y0 + dy * s + dx * w, w < -half * 0.3 ? LEAF_LIGHT : w > half * 0.5 ? LEAF_DARK : LEAF)
     }
   }
 }
 
-// 야자수 잎 하나: 처지는 잎줄기를 따라 양쪽으로 작은 잎을 단다. 잎은 끝으로 갈수록 짧아진다
+// 야자수 잎 하나: 처지는 잎줄기를 따라 양쪽으로 작은 잎이 아래로 늘어진다. 잎은 끝으로 갈수록 짧아진다
 function drawFrond(px, { angle, length, droop }, sway) {
   const dx = Math.cos(angle)
   const dy = Math.sin(angle)
   for (let s = 0; s <= length; s += 0.5) {
     const k = s / length
-    const x = -3 + dx * s
-    const y = -3 + dy * s + droop * k * k + sway * k
+    const x = 6 + dx * s + sway * k
+    const y = -6 + dy * s + droop * k * k
     set(px, x, y, PALM_DARK)
-    if (s < 3 || Math.round(s * 2) % 3 !== 0) continue
+    if (s < 3 || Math.round(s * 2) % 2 !== 0) continue
     const tx = dx
-    const ty = dy + (2 * droop * k + sway) / length
+    const ty = dy + (2 * droop * k) / length
     const n = Math.hypot(tx, ty)
-    const leaf = 2 + 8 * Math.sin(Math.PI * Math.min(1, k * 1.15)) * (1 - 0.35 * k)
+    const leaf = 2 + 7 * Math.sin(Math.PI * Math.min(1, k * 1.15)) * (1 - 0.35 * k)
     for (const side of [1, -1]) {
-      // 잎줄기에 수직인 방향에서 끝 쪽과 아래쪽(중력)으로 기울인다
-      let lx = (-ty / n) * side * 0.8 + (tx / n) * 0.45
-      let ly = (tx / n) * side * 0.8 + (ty / n) * 0.45 + 0.55
+      // 잎줄기에 수직인 방향에서 끝 쪽과 아래쪽(중력)으로 많이 기울인다
+      let lx = (-ty / n) * side * 0.6 + (tx / n) * 0.3
+      let ly = (tx / n) * side * 0.6 + (ty / n) * 0.3 + 1.0
       const ln = Math.hypot(lx, ly)
       lx /= ln
       ly /= ln
       for (let i = 1; i <= leaf; i++) {
-        set(px, x + lx * i, y + ly * i, i > leaf - 2 ? PALM_LIGHT : side > 0 ? PALM : PALM_LIGHT)
+        set(px, x + lx * i, y + ly * i, i > leaf - 2 ? PALM_LIGHT : side > 0 ? PALM : PALM_DARK)
       }
     }
   }
@@ -199,31 +291,27 @@ function drawFrond(px, { angle, length, droop }, sway) {
 
 // 고양이 뒷모습 스프라이트와 발밑 그림자
 function drawCat(px) {
+  const bottom = CAT.y + CAT_SPRITE.length
+  for (let x = CAT.x + 2; x < CAT.x + 24; x++) {
+    set(px, x, bottom - 1, SHADOW)
+    if (x > CAT.x + 5 && x < CAT.x + 21) set(px, x, bottom, SHADOW)
+  }
   CAT_SPRITE.forEach((row, y) => {
     for (let x = 0; x < row.length; x++) {
       const c = CAT_COLORS[row[x]]
       if (c) set(px, CAT.x + x, CAT.y + y, c)
     }
   })
-  // 발밑 그림자
-  for (let x = 1; x < 15; x++) set(px, CAT.x + x, CAT.y + CAT_SPRITE.length, SAND_DARK)
-}
-
-// 물가 모양(굴곡)은 고정, 파도는 시간에 따라 밀려왔다 빠진다. 밀려올 땐 빠르고 빠질 땐 느리다.
-const shoreBase = (x) => SHORE + 2.5 * Math.sin(x * 0.07) + 2 * Math.sin(x * 0.023 + 1)
-const surge = (x, t) => {
-  const s = Math.sin(t * 0.7 - x * 0.015)
-  return s > 0 ? Math.sqrt(s) : s * 0.4
 }
 
 function draw(px, t) {
   const frame = Math.floor(t * FPS)
-  const sparkleFrame = Math.floor(t * 4)
 
   for (let x = 0; x < W; x++) {
     const base = shoreBase(x)
     const edge = base + REACH * (0.5 + 0.5 * surge(x, t)) // 이 열의 현재 물가
-    const wetLine = base + REACH + 1 // 파도가 닿았던 가장 먼 곳까지 젖은 모래
+    const wetLine = base + REACH + 2 // 파도가 닿았던 가장 먼 곳까지 젖은 모래
+    const sunDx = Math.abs(x - SUN.x)
 
     for (let y = 0; y < H; y++) {
       let c
@@ -233,70 +321,50 @@ function draw(px, t) {
         const z = y - HORIZON
         const depth = z / (edge - HORIZON)
         c = pick(SEA, depth, x, y)
-        // 물결: 가까울수록 줄 간격이 넓어지고, 시간에 따라 물가 쪽으로 밀려온다.
-        const phase = Math.sqrt(z) * 4.2 - t * 2.2 + Math.sin(x * 0.12 + z * 0.4) * 0.8
-        if (Math.sin(phase) > 0.93 && hash(x >> 2, y, 7) > 0.25) c = SEA_LIGHT
-        // 햇빛이 비치는 기둥에서 반짝임
-        if (Math.abs(x - SUN.x) < 4 + z * 0.35 && hash(x, y, sparkleFrame) > 0.9) c = SPARKLE
+        // 잔물결: 짧은 가로 점선이 제각각 천천히 반짝인다(멀수록 짧다)
+        const segW = 3 + Math.floor(depth * 3)
+        const seg = Math.floor((x + ((y * 7) % segW)) / segW)
+        const twinkle = Math.floor(t * 1.5 + hash(seg, y, 11) * 10)
+        const n = hash(seg, y, twinkle)
+        if (n > 0.9) c = n > 0.97 ? WHITE : SEA_LIGHT
+        // 해 아래로 길게 비치는 금빛 물결
+        const half = 2 + z * 0.3
+        if (sunDx < half && hash(seg, y, twinkle + 50) > 0.3 + (sunDx / half) * 0.6) c = sunDx < half * 0.45 ? GLINT : GLINT_SOFT
         // 물가의 거품
         const toEdge = edge - y
-        if (toEdge < 1.5) c = FOAM
-        else if (toEdge < 3.5 && hash(x, y, frame) > 0.45) c = FOAM
+        if (toEdge < 1.2) c = FOAM
+        else if (toEdge < 3 && hash(x, y, frame) > 0.5) c = FOAM
       } else if (y < wetLine) {
-        c = y - edge < 1.5 && hash(x, y, frame) > 0.6 ? FOAM : hash(x, y, 1) > 0.85 ? WET_SAND_DARK : WET_SAND
+        c = sunDx < 8 && hash(x, y, frame >> 2) > 0.4 ? WET_GLINT : WET_SAND
       } else {
         const n = hash(x, y, 1)
-        c = n > 0.9 ? SAND_DARK : n < 0.05 ? SAND_LIGHT : SAND
+        const patch = hash(x >> 2, y >> 1, 2)
+        c = n > 0.94 || (patch > 0.9 && n > 0.5) ? SAND_DARK : n < 0.04 ? SAND_LIGHT : SAND
+        if (sunDx < 6 && y < wetLine + 6 && hash(x, y, 8) > 0.6) c = WET_GLINT
       }
       px[y * W + x] = c
     }
   }
 
-  // 해 (테두리는 디더링으로 번지게)
-  for (let y = SUN.y - SUN.r - 3; y <= SUN.y + SUN.r + 3; y++) {
-    for (let x = SUN.x - SUN.r - 3; x <= SUN.x + SUN.r + 3; x++) {
-      const d = Math.hypot(x - SUN.x, y - SUN.y)
-      if (d <= SUN.r) px[y * W + x] = SUN_COLOR
-      else if (d <= SUN.r + 2.5 && BAYER[(y & 3) * 4 + (x & 3)] > (d - SUN.r) / 2.5) px[y * W + x] = SUN_GLOW
-    }
-  }
+  drawSun(px)
+  for (const cloud of CLOUDS) drawCloud(px, cloud, t)
+  drawIsland(px, 0, 64, leftIsland)
+  drawIsland(px, 149, W, rightIsland)
+  drawLighthouse(px)
 
-  drawIsland(px, t)
+  // 바위: 물가에 큰 바위 무리, 물속 작은 바위, 오른쪽 아래 모래 위 바위
+  drawRock(px, 191, 109, 6, 5, frame, true)
+  drawRock(px, 218, 105, 9, 12, frame, true)
+  drawRock(px, 205, 108, 12, 13, frame, true)
+  drawRock(px, 167, 107, 7, 4, frame, true)
+  drawRock(px, 203, 141, 14, 9, frame, false)
 
-  // 구름은 천천히 흘러가고 화면 밖으로 나가면 반대편에서 다시 나온다.
-  for (const cloud of CLOUDS) {
-    const span = W + cloud.w * 4
-    const cx = ((cloud.x + t * cloud.speed) % span) - cloud.w * 2
-    for (const [ox, oy, s] of [[0, 0, 1], [-cloud.w * 0.6, 1, 0.65], [cloud.w * 0.7, 1, 0.55]]) {
-      const w = cloud.w * s
-      const h = cloud.h * s + 1
-      for (let y = Math.floor(cloud.y + oy - h); y <= cloud.y + oy + 1; y++) {
-        for (let x = Math.floor(cx + ox - w); x <= cx + ox + w; x++) {
-          if (x < 0 || x >= W || y < 0) continue
-          const dx = (x - cx - ox) / w
-          const dy = (y - cloud.y - oy) / h
-          if (dx * dx + dy * dy <= 1) {
-            px[y * W + x] = y >= cloud.y + oy ? CLOUD_SHADE : CLOUD
-          }
-        }
-      }
-    }
-  }
-
-  // 조개껍데기 (파도가 덮으면 가려진다)
-  for (const [sx, sy] of SHELLS) {
-    if (sy < shoreBase(sx) + REACH * (0.5 + 0.5 * surge(sx, t))) continue
-    px[sy * W + sx] = SHELL
-    px[sy * W + sx + 1] = SHELL
-  }
-
-  // 앞쪽 소품: 물가 바위(파도 위로 드러남)·모래 위 바위, 풀, 고양이, 야자수 잎
-  drawRock(px, 181, 75, 11, 8)
-  drawRock(px, 168, 77, 5, 4)
-  drawRock(px, 170, 104, 10, 7)
-  drawRock(px, 157, 104, 4, 3)
   const sway = Math.sin(t * 1.3)
-  for (const [gx, gy] of GRASS_TUFTS) drawTuft(px, gx, gy, sway * 0.4)
+  drawSprout(px, 10, 118, 16, sway * 0.8)
+  drawSprout(px, 4, 121, 9, sway * 0.6)
+  for (const [x0, angle, length] of [[4, -1.25, 16], [10, -1.0, 13], [20, -1.45, 12], [28, -0.75, 10], [36, -1.2, 8]]) {
+    drawBlade(px, x0, H + 1, angle, length, sway * 0.05)
+  }
   drawCat(px)
   FRONDS.forEach((frond, i) => drawFrond(px, frond, sway * 1.2 + Math.sin(t * 0.9 + i) * 0.6))
 }
@@ -313,9 +381,9 @@ export default function PixelBeach() {
       ctx.putImageData(image, 0, 0)
     }
 
-    // 움직임 줄이기 설정이면 한 장만 그린다.
+    // 움직임 줄이기 설정이면 파도가 밀려온 순간을 한 장만 그린다.
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      render(0)
+      render(2)
       return undefined
     }
 
